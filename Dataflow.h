@@ -100,7 +100,7 @@ void compForwardDataflow(Function *fn,
 
         // Merge all outcoming value
         T bbentryval = (*result)[bb].first;
-        for (auto pi = prev_begin(bb), pe = pred_end(bb); pi != pe; pi++) {
+        for (auto pi = pred_begin(bb), pe = pred_end(bb); pi != pe; pi++) {
             BasicBlock *prev = *pi;
             visitor->merge(&bbentryval, (*result)[prev].second);
         }
@@ -112,7 +112,7 @@ void compForwardDataflow(Function *fn,
         if (bbentryval == (*result)[bb].second) continue;
         (*result)[bb].second = bbentryval;
 
-        for (succ_iterator si = succ_begin(), se = succ_begin(bb); si != se; si++) {
+        for (succ_iterator si = succ_begin(bb), se = succ_begin(bb); si != se; si++) {
             worklist.insert(*si);
         }
     }
