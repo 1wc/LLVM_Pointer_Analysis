@@ -38,7 +38,15 @@ class FunPtrVisitor : public DataflowVisitor<struct FunPtrInfo>{
 public:
 	FunPtrVisitor() {}
 	void merge(FunPtrInfo * dest, const FunPtrInfo & src) override {
-		int a = 1;
+        for (std::map<Value *, std::set<Value *>>::const_iterator ptiter = src.PointTos.begin(); ptiter != src.PointTos.end(); ptiter++) {
+            if(dest->PointTos.find((*ptiter).first) != dest->PointTos.end()){
+                    dest->PointTos[(*ptiter).first].insert((*ptiter).second.begin(),(*ptiter).second.end());
+            } else {
+                    dest->PointTos[(*ptiter).first] = (*ptiter).second;  
+            }
+       }
+
+
 	}
 
 	void compDFVal(Instruction *inst, FunPtrInfo *dfval ) override {
@@ -59,17 +67,18 @@ public:
         errs().write_escaped(M.getName()) << '\n';
         M.print(errs(), 0);
         errs() << "------------------------------\n";
+		FunPtrInfo initval;
+		FunPtrInfo old_initval;
         while (true) {
         	for (Function &F : M) {
 	        	FunPtrVisitor visitor;
 	        	DataflowResult<FunPtrInfo>::Type result;
-	        	FunPtrInfo initval;
-
 	        	compForwardDataflow(&F, &visitor, &result, initval);
 	        	printDataflowResult<FunPtrInfo>(errs(), result);
         	}
-        	// TODO
-        	break;
+		if(old_initval == initval) break;
+		else old_initval = initval;
+
         }
         
 

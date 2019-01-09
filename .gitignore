@@ -1,5 +1,1 @@
-CMakeCache.txt
-CMakeFiles/
-cmake_install.cmake
-llvmassignment
-Makefile
+build/
