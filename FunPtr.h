@@ -48,8 +48,6 @@ public:
 };
 
 ///!TODO TO BE COMPLETED BY YOU FOR ASSIGNMENT 3
-
-
 class FuncPtrPass : public ModulePass {
 public:
     static char ID; // Pass identification, replacement for typeid
@@ -59,7 +57,7 @@ public:
     bool runOnModule(Module &M) override {
         errs() << "Hello: ";
         errs().write_escaped(M.getName()) << '\n';
-        M.dump();
+        M.print(errs(), 0);
         errs() << "------------------------------\n";
         while (true) {
         	for (Function &F : M) {

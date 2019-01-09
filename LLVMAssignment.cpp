@@ -29,7 +29,7 @@
 
 #include <llvm/Transforms/Scalar.h>
 
-#include "Liveness.h"
+// #include "Liveness.h"
 #include "FunPtr.h"
 #include "llvm/IR/Function.h"
 #include "llvm/Pass.h"
@@ -79,8 +79,8 @@ char EnableFunctionOptPass::ID = 0;
 // char FuncPtrPass::ID = 0;
 static RegisterPass<FuncPtrPass> X("funcptrpass", "Print function call instruction");
 
-char Liveness::ID = 0;
-static RegisterPass<Liveness> Y("liveness", "Liveness Dataflow Analysis");
+// char Liveness::ID = 0;
+// static RegisterPass<Liveness> Y("liveness", "Liveness Dataflow Analysis");
 
 static cl::opt<std::string>
 InputFilename(cl::Positional,

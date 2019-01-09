@@ -173,7 +173,7 @@ void printDataflowResult(raw_ostream &out,
     for ( typename DataflowResult<T>::Type::const_iterator it = dfresult.begin();
             it != dfresult.end(); ++it ) {
         if (it->first == NULL) out << "*";
-        else it->first->dump();
+        else it->first->print(errs());
         out << "\n\tin : "
             << it->second.first 
             << "\n\tout :  "
