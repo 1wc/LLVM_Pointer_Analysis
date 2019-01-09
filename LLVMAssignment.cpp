@@ -115,7 +115,7 @@ int main(int argc, char **argv) {
    Passes.add(new FuncPtrPass());
    Passes.run(*M.get());
 #ifndef NDEBUG
-   system("pause");
+   // system("pause");
 #endif
 }
 

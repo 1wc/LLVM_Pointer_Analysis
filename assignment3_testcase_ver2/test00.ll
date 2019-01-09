@@ -95,7 +95,7 @@ attributes #1 = { nounwind readnone speculatable }
 !llvm.ident = !{!6}
 
 !0 = distinct !DICompileUnit(language: DW_LANG_C99, file: !1, producer: "clang version 5.0.0 (tags/RELEASE_500/final)", isOptimized: false, runtimeVersion: 0, emissionKind: FullDebug, enums: !2)
-!1 = !DIFile(filename: "test00.c", directory: "/home/liwc/compile/assignment3_testcase_ver2")
+!1 = !DIFile(filename: "test00.c", directory: "/home/liwc/llvm-assignment/assignment3_testcase_ver2")
 !2 = !{}
 !3 = !{i32 2, !"Dwarf Version", i32 4}
 !4 = !{i32 2, !"Debug Info Version", i32 3}
