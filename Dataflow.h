@@ -106,7 +106,7 @@ void compForwardDataflow(Function *fn,
         }
 
         (*result)[bb].first = bbentryval;
-        visitor->compDFVal(bb, &bbentryval, false);
+        visitor->compDFVal(bb, &bbentryval, true);
 
         // If ingoing value changed, propagate it along the CFG
         if (bbentryval == (*result)[bb].second) continue;

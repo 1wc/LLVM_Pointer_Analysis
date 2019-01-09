@@ -22,16 +22,16 @@ inline raw_ostream &operator<<(raw_ostream &out, const FunPtrInfo &info) {
         it != info.PointTos.end(); ++it) {
         const Value *Pointer = it->first;
         std::set<Value *> Pointees = it->second;
-        out <<"Pointer is:\n";
+        out <<"\nPointer is:\n";
         // out << *(Pointer) << "\n";
-        out << Pointer->getName();
-        out <<"Values are:\n";
+        out << Pointer->getName()<<"\n";
+        out <<"\nValues are:\n";
         for (std::set<Value *>::iterator tmpit = Pointees.begin(); tmpit != Pointees.end();
             ++tmpit)  {
             // out << *(*tmpit) << " ";
-            out << (*tmpit)->getName();
+            out << (*tmpit)->getName()<<" ";
         }
-        out <<"overover\n";
+        out <<"\noverover\n";
     }
     return out;
 }
@@ -73,32 +73,63 @@ public:
                 directCalls.push_back(CI);
                 // process args passed
                 Function *callee = CI->getCalledFunction();
-                FunPtrInfo fpi;
+                
                 for (unsigned i = 0;i < CI->getNumArgOperands(); ++i) {
-                    Value *x = CI->getArgOperand(i);
+                    Value *y = CI->getArgOperand(i);
 
                     Function::arg_iterator argit = callee->arg_begin();
                     argit += i;
-                    Value *y = &*argit;
-
-                    if (x->getType()->isPointerTy()) {
-                        dfval->PointTos[x].clear();
+                    Value *x = &*argit;
+                    // x xingcan
+                    // y shican
+                    // errs()<<"\nxxxxxxxxxxxxxxxxxxxxx is\n";
+                    // errs()<< (*x);
+                    // errs()<<"\nyyyyyyyyyyyyyyyyyyyyyy is\n";
+                    // errs()<< (*y);
+                    // errs()<<"\n";
+                    FunPtrInfo fpi;
+                    if (PHINode *Phi = dyn_cast<PHINode>(y)) {
+                        // unsigned num = Phi->getNumIncomingValues();
+                        // for (unsigned i = 0; i < num; ++i) {
+                        //     Value *v = Phi->getIncomingValue(i);
+                        //     if (v->getType()->isFunctionTy() || v->getType()->isPointerTy()) {
+                        //         if (v->getName() == "null") continue;
+                        //         // errs()<<*v;
+                        //         dfval->PointTos[x].insert(v);
+                        //     }
+                        // }
+                        // errs()<<"isisisis in ???";
+                        // for (std::set<Value *>::iterator tmpit = dfval->PointTos[y].begin(); tmpit != dfval->PointTos[y].end();
+                        //     tmpit++) {
+                        //     errs()<<(*tmpit)<<"\n";
+                        // }
+                        // errs()<<(*CI);
+                        // errs()<<dfval->PointTos[y].size()<<"\n";
                         dfval->PointTos[x].insert(dfval->PointTos[y].begin(), 
                             dfval->PointTos[y].end());
-                        // if (worklist.find(callee) != worklist.end()) {
-                        //     worklist[callee].PointTos[]
-                        // }
-                        std::set<Value *> tmpy;
-                        tmpy.insert(dfval->PointTos[y].begin(), 
-                            dfval->PointTos[y].end());
-                        fpi.PointTos[x] = tmpy;
-                    }
 
-                }
-                if (worklist.find(callee) == worklist.end()) {
-                    worklist[callee] = fpi;
-                } else {
-                    mergeVal(&(worklist[callee]), &fpi);
+                        if (worklist.find(callee) != worklist.end()) {
+                            worklist[callee].PointTos[x].insert(dfval->PointTos[x].begin(), 
+                                dfval->PointTos[x].end());
+                        } else {
+                            fpi.PointTos[x].insert(dfval->PointTos[x].begin(), 
+                                dfval->PointTos[x].end());
+                            worklist[callee] = fpi;
+                        }
+                    } else if (x->getType()->isPointerTy()) {
+                        // dfval->PointTos[x].clear();
+                        // dfval->PointTos[x].insert(y);
+                        // dfval->PointTos[x].insert(dfval->PointTos[y].begin(), 
+                        //     dfval->PointTos[y].end());
+
+
+                        if (worklist.find(callee) != worklist.end()) {
+                            worklist[callee].PointTos[x].insert(y);
+                        } else {
+                            fpi.PointTos[x].insert(y);
+                            worklist[callee] = fpi;
+                        }
+                    } 
                 }
             } else {
             // else, process undirect call inst
@@ -117,6 +148,7 @@ public:
                 }
             }
             if (pointees.size() != 0) {
+                errs()<<"dooooooooooooooooooooooooooooooooo\n";
                 dfval->PointTos[Phi] = pointees;
             }
         }
@@ -153,16 +185,17 @@ public:
     return line;
   }
     bool runOnModule(Module &M) override {
-        FunPtrInfo initval;
-        FunPtrInfo old_initval;
 
         // M.print(errs(), 0);
         for (Function &F : M) {
             FunPtrInfo initval;
             worklist[&F] = initval;
         }
+        int cnt = 0;
+        // while (cnt < 10) {
         while (worklist.size() > 0) {
-            for(std::map<Function *, FunPtrInfo>::iterator it=worklist.begin();it!=worklist.end();it++){
+            cnt += 1;
+            for(std::map<Function *, FunPtrInfo>::iterator it = worklist.begin() ; it != worklist.end() ; it++){
                 FunPtrVisitor visitor;
                 DataflowResult<FunPtrInfo>::Type result;
                 compForwardDataflow(((*it).first), &visitor, &result, (*it).second);
@@ -171,7 +204,7 @@ public:
             }
         }
         printRes();
-
+        errs()<<"iterate for "<<cnt<<"times\n";
         return false;
     }
 };
