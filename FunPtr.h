@@ -22,16 +22,21 @@ inline raw_ostream &operator<<(raw_ostream &out, const FunPtrInfo &info) {
         it != info.PointTos.end(); ++it) {
         const Value *Pointer = it->first;
         std::set<Value *> Pointees = it->second;
+        out <<"Pointer is:\n";
+        // out << *(Pointer) << "\n";
         out << Pointer->getName();
-        out << "  ";
+        out <<"Values are:\n";
         for (std::set<Value *>::iterator tmpit = Pointees.begin(); tmpit != Pointees.end();
             ++tmpit)  {
-            out << (*tmpit) << " ";
+            // out << *(*tmpit) << " ";
+            out << (*tmpit)->getName();
         }
+        out <<"overover\n";
     }
     return out;
 }
 std::vector<CallInst *> directCalls;
+std::map<Function *, FunPtrInfo> worklist;
 
 class FunPtrVisitor : public DataflowVisitor<struct FunPtrInfo>{
 
@@ -46,7 +51,20 @@ public:
             }
        }
     }
+    void mergeVal(FunPtrInfo *dest, FunPtrInfo * src) {
+        typedef std::map<Value *, std::set<Value *>> pointersty;
 
+        pointersty map1 = dest->PointTos;
+        pointersty map2 = src->PointTos;
+
+        for (pointersty::iterator pit = map2.begin(); pit != map2.end(); pit++) {
+            if (map1.find((*pit).first) != map1.end()) {
+                map1[(*pit).first] = (*pit).second;
+            } else {
+                map1[(*pit).first].insert((*pit).second.begin(), (*pit).second.end());
+            }
+        }
+    }
     void compDFVal(Instruction *inst, FunPtrInfo *dfval ) override {
         if (isa<DbgInfoIntrinsic>(inst)) return;
         if (CallInst *CI = dyn_cast<CallInst>(inst)) {
@@ -55,36 +73,46 @@ public:
                 directCalls.push_back(CI);
                 // process args passed
                 Function *callee = CI->getCalledFunction();
-                for (unsigned i = 0;i < CI->getNumArgOprands(); ++i) {
-                    Value *x = c->getArgOpreads(i);
-                    Function::arg_iterator argit = func->arg_begin();
-                    argit += i;
+                FunPtrInfo fpi;
+                for (unsigned i = 0;i < CI->getNumArgOperands(); ++i) {
+                    Value *x = CI->getArgOperand(i);
 
+                    Function::arg_iterator argit = callee->arg_begin();
+                    argit += i;
                     Value *y = &*argit;
 
-                    if (arg->getType()->isPointerTy()) {
-                        std::set<Value *> Sx = dfval->PointTos[x];
-                        std::set<Value *> Sy = dfval->PointTos[y];
-                        Sx.clear();
-                        dfval->PointTos[x].insert(Sy.begin(), Sy.end());
+                    if (x->getType()->isPointerTy()) {
+                        dfval->PointTos[x].clear();
+                        dfval->PointTos[x].insert(dfval->PointTos[y].begin(), 
+                            dfval->PointTos[y].end());
+                        // if (worklist.find(callee) != worklist.end()) {
+                        //     worklist[callee].PointTos[]
+                        // }
+                        std::set<Value *> tmpy;
+                        tmpy.insert(dfval->PointTos[y].begin(), 
+                            dfval->PointTos[y].end());
+                        fpi.PointTos[x] = tmpy;
                     }
+
                 }
-                
+                if (worklist.find(callee) == worklist.end()) {
+                    worklist[callee] = fpi;
+                } else {
+                    mergeVal(&(worklist[callee]), &fpi);
+                }
             } else {
             // else, process undirect call inst
 
             }
             
-
-             
         } else if (PHINode *Phi = dyn_cast<PHINode>(inst)) {
             std::set<Value *> pointees;
             unsigned num = Phi->getNumIncomingValues();
             for (unsigned i = 0; i < num; ++i) {
                 Value *v = Phi->getIncomingValue(i);
                 if (v->getType()->isFunctionTy() || v->getType()->isPointerTy()) {
-                    if (v->getName() == null) continue;
-                    errs()<<*v;
+                    if (v->getName() == "null") continue;
+                    // errs()<<*v;
                     pointees.insert(v);
                 }
             }
@@ -129,16 +157,18 @@ public:
         FunPtrInfo old_initval;
 
         // M.print(errs(), 0);
-        while (true) {
-            for (Function &F : M) {
+        for (Function &F : M) {
+            FunPtrInfo initval;
+            worklist[&F] = initval;
+        }
+        while (worklist.size() > 0) {
+            for(std::map<Function *, FunPtrInfo>::iterator it=worklist.begin();it!=worklist.end();it++){
                 FunPtrVisitor visitor;
                 DataflowResult<FunPtrInfo>::Type result;
-                compForwardDataflow(&F, &visitor, &result, initval);
+                compForwardDataflow(((*it).first), &visitor, &result, (*it).second);
                 printDataflowResult<FunPtrInfo>(errs(), result);
+                worklist.erase(it);
             }
-        if(old_initval == initval) break;
-        else old_initval = initval;
-
         }
         printRes();
 
