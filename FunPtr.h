@@ -8,7 +8,7 @@
 using namespace llvm;
 
 struct FunPtrInfo {
-	std::set<Value *, std::set<Value *>> PointTos;
+	std::map<Value *, std::set<Value *>> PointTos;
 	FunPtrInfo() : PointTos() {};
 	FunPtrInfo(const FunPtrInfo & info) : PointTos(info.PointTos) {}
 

@@ -1,4 +1,4 @@
-d//===- Hello.cpp - Example code from "Writing an LLVM Pass" ---------------===//
+//===- Hello.cpp - Example code from "Writing an LLVM Pass" ---------------===//
 //
 //                     The LLVM Compiler Infrastructure
 //
