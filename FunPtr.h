@@ -45,15 +45,52 @@ public:
                     dest->PointTos[(*ptiter).first] = (*ptiter).second;  
             }
        }
-
-
     }
 
     void compDFVal(Instruction *inst, FunPtrInfo *dfval ) override {
         if (isa<DbgInfoIntrinsic>(inst)) return;
         if (CallInst *CI = dyn_cast<CallInst>(inst)) {
-            // CI->print(errs());
-            directCalls.push_back(CI);
+            // process direct call inst
+            if (CI->getCalledFunction() != NULL) {
+                directCalls.push_back(CI);
+                // process args passed
+                Function *callee = CI->getCalledFunction();
+                for (unsigned i = 0;i < CI->getNumArgOprands(); ++i) {
+                    Value *x = c->getArgOpreads(i);
+                    Function::arg_iterator argit = func->arg_begin();
+                    argit += i;
+
+                    Value *y = &*argit;
+
+                    if (arg->getType()->isPointerTy()) {
+                        std::set<Value *> Sx = dfval->PointTos[x];
+                        std::set<Value *> Sy = dfval->PointTos[y];
+                        Sx.clear();
+                        dfval->PointTos[x].insert(Sy.begin(), Sy.end());
+                    }
+                }
+                
+            } else {
+            // else, process undirect call inst
+
+            }
+            
+
+             
+        } else if (PHINode *Phi = dyn_cast<PHINode>(inst)) {
+            std::set<Value *> pointees;
+            unsigned num = Phi->getNumIncomingValues();
+            for (unsigned i = 0; i < num; ++i) {
+                Value *v = Phi->getIncomingValue(i);
+                if (v->getType()->isFunctionTy() || v->getType()->isPointerTy()) {
+                    if (v->getName() == null) continue;
+                    errs()<<*v;
+                    pointees.insert(v);
+                }
+            }
+            if (pointees.size() != 0) {
+                dfval->PointTos[Phi] = pointees;
+            }
         }
 
     }
@@ -91,12 +128,13 @@ public:
         FunPtrInfo initval;
         FunPtrInfo old_initval;
 
+        // M.print(errs(), 0);
         while (true) {
             for (Function &F : M) {
                 FunPtrVisitor visitor;
                 DataflowResult<FunPtrInfo>::Type result;
                 compForwardDataflow(&F, &visitor, &result, initval);
-                // printDataflowResult<FunPtrInfo>(errs(), result);
+                printDataflowResult<FunPtrInfo>(errs(), result);
             }
         if(old_initval == initval) break;
         else old_initval = initval;
