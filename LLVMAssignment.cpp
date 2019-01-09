@@ -30,6 +30,7 @@
 #include <llvm/Transforms/Scalar.h>
 
 #include "Liveness.h"
+#include "FunPtr.h"
 #include "llvm/IR/Function.h"
 #include "llvm/Pass.h"
 #include "llvm/Support/raw_ostream.h"
@@ -38,6 +39,7 @@ using namespace llvm;
 static ManagedStatic<LLVMContext> GlobalContext;
 static LLVMContext &getGlobalContext() { return *GlobalContext; }
 #endif
+
 
 /* In LLVM 5.0, when  -O0 passed to clang , the functions generated with clang will
 * have optnone attribute which would lead to some transform passes disabled, like mem2reg.
@@ -58,23 +60,23 @@ struct EnableFunctionOptPass : public FunctionPass {
 char EnableFunctionOptPass::ID = 0;
 #endif
 
-///!TODO TO BE COMPLETED BY YOU FOR ASSIGNMENT 3
-struct FuncPtrPass : public ModulePass {
-    static char ID; // Pass identification, replacement for typeid
-    FuncPtrPass() : ModulePass(ID) {}
+// ///!TODO TO BE COMPLETED BY YOU FOR ASSIGNMENT 3
+// struct FuncPtrPass : public ModulePass {
+//     static char ID; // Pass identification, replacement for typeid
+//     FuncPtrPass() : ModulePass(ID) {}
 
 
-    bool runOnModule(Module &M) override {
-        errs() << "Hello: ";
-        errs().write_escaped(M.getName()) << '\n';
-        M.dump();
-        errs() << "------------------------------\n";
-        return false;
-    }
-};
+//     bool runOnModule(Module &M) override {
+//         errs() << "Hello: ";
+//         errs().write_escaped(M.getName()) << '\n';
+//         M.dump();
+//         errs() << "------------------------------\n";
+//         return false;
+//     }
+// };
 
 
-char FuncPtrPass::ID = 0;
+// char FuncPtrPass::ID = 0;
 static RegisterPass<FuncPtrPass> X("funcptrpass", "Print function call instruction");
 
 char Liveness::ID = 0;
