@@ -69,6 +69,8 @@ public:
     }
     void compDFVal(Instruction *inst, FunPtrInfo *dfval ) override {
         if (isa<DbgInfoIntrinsic>(inst)) return;
+        if (isa<MemIntrinsic>(inst)) return;
+
         if (CallInst *CI = dyn_cast<CallInst>(inst)) {
             // process direct call inst
             if (CI->getCalledFunction() != NULL) {
@@ -146,6 +148,16 @@ public:
             if (pointees.size() != 0) {
                 dfval->PointTos[Phi] = pointees;
             }
+        } else if (StoreInst *Si = dyn_cast<StoreInst>(inst)) {
+            // Si->getValueOperand()->print(errs());
+            Value *pvv = Si->getPointerOperand();
+        } else if (GetElementPtrInst *Gep = dyn_cast<GetElementPtrInst>(inst)) {
+            if (Gep->isInBounds()) {
+                Value *pvv = Gep->getPointerOperand();
+                pvv->print(errs());
+                Gep->print(errs());
+            }
+
         }
 
     }
