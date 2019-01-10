@@ -24,7 +24,7 @@ inline raw_ostream &operator<<(raw_ostream &out, const FunPtrInfo &info) {
         std::set<Value *> Pointees = it->second;
         out <<"\nPointer is:\n";
         // out << *(Pointer) << "\n";
-        out << Pointer->getName()<<"\n";
+        out << (*Pointer)<<"\n";
         out <<"\nValues are:\n";
         for (std::set<Value *>::iterator tmpit = Pointees.begin(); tmpit != Pointees.end();
             ++tmpit)  {
@@ -150,15 +150,40 @@ public:
             }
         } else if (StoreInst *Si = dyn_cast<StoreInst>(inst)) {
             // Si->getValueOperand()->print(errs());
-            Value *pvv = Si->getPointerOperand();
-        } else if (GetElementPtrInst *Gep = dyn_cast<GetElementPtrInst>(inst)) {
-            if (Gep->isInBounds()) {
-                Value *pvv = Gep->getPointerOperand();
-                pvv->print(errs());
-                Gep->print(errs());
+            Value *v1 = Si->getValueOperand();
+            // errs()<<"insert!!!\n"<<v1->getName();
+            Value *V2 = Si->getPointerOperand();
+            GetElementPtrInst *v2;
+            if (v2 = dyn_cast<GetElementPtrInst>(V2)) {
+                if(isa<Function>(v1)){
+                    dfval->PointTos[v2].insert(v1);
+                } else {
+                    //TODO
+                    dfval->PointTos[v2].insert(dfval->PointTos[v1].begin(),dfval->PointTos[v1].end());
+                }
+                if (v2->isInBounds()) {
+                    Value *pvv = v2->getPointerOperand();
+                    dfval->PointTos[pvv].insert(dfval->PointTos[v2].begin(),
+                        dfval->PointTos[v2].end());
+                }
             }
-
-        }
+            
+            // errs()<<"over store\n";
+        } else if (LoadInst *Li = dyn_cast<LoadInst>(inst)){
+            // errs()<<"start load\n";
+            Value *V2 = Li->getPointerOperand();
+            GetElementPtrInst *v2;
+            if (v2 = dyn_cast<GetElementPtrInst>(V2)) {
+                if (v2->isInBounds()) {
+                    // errs()<<"isinbounds\n";
+                    Value *pvv = v2->getPointerOperand();
+                    dfval->PointTos[v2].insert(dfval->PointTos[pvv].begin(),
+                        dfval->PointTos[pvv].end());
+                }
+            }
+            dfval->PointTos[Li].insert(dfval->PointTos[v2].begin(),dfval->PointTos[v2].end());
+            // errs()<<"over load\n";
+        } 
 
     }
 
@@ -215,7 +240,7 @@ public:
                 FunPtrVisitor visitor;
                 DataflowResult<FunPtrInfo>::Type result;
                 compForwardDataflow(((*it).first), &visitor, &result, (*it).second);
-                // printDataflowResult<FunPtrInfo>(errs(), result);
+                printDataflowResult<FunPtrInfo>(errs(), result);
                 worklist.erase(it);
             }
         }
