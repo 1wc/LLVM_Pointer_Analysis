@@ -24,6 +24,7 @@ inline raw_ostream &operator<<(raw_ostream &out, const FunPtrInfo &info) {
         std::set<Value *> Pointees = it->second;
         out <<"\nPointer is:\n";
         // out << *(Pointer) << "\n";
+
         out << (*Pointer)<<"\n";
         out <<"\nValues are:\n";
         for (std::set<Value *>::iterator tmpit = Pointees.begin(); tmpit != Pointees.end();
@@ -151,38 +152,66 @@ public:
         } else if (StoreInst *Si = dyn_cast<StoreInst>(inst)) {
             // Si->getValueOperand()->print(errs());
             Value *v1 = Si->getValueOperand();
+            // v1->print(errs());
             // errs()<<"insert!!!\n"<<v1->getName();
-            Value *V2 = Si->getPointerOperand();
-            GetElementPtrInst *v2;
-            if (v2 = dyn_cast<GetElementPtrInst>(V2)) {
-                if(isa<Function>(v1)){
-                    dfval->PointTos[v2].insert(v1);
-                } else {
-                    //TODO
-                    dfval->PointTos[v2].insert(dfval->PointTos[v1].begin(),dfval->PointTos[v1].end());
+            Value *v2 = Si->getPointerOperand();
+            if (GetElementPtrInst *gep = dyn_cast<GetElementPtrInst>(v2)) {
+                if (gep->isInBounds()) {
+                    Value *pvv = gep->getPointerOperand();
+                    if(isa<Function>(v1)) {
+                        dfval->PointTos[gep].clear();
+                        dfval->PointTos[gep].insert(v1);
+                    } else if (isa<AllocaInst>(v1)) {
+                        // gep->print(errs());
+                        // errs()<<"\n";
+                        // v1->print(errs());
+                        // errs()<<"\n\n";
+                        dfval->PointTos[gep].clear();
+                        dfval->PointTos[gep].insert(dfval->PointTos[v1].begin(),
+                            dfval->PointTos[v1].end());
+
+                    } else {
+                        dfval->PointTos[gep].insert(dfval->PointTos[v1].begin(),dfval->PointTos[v1].end());
+                    }
+                    dfval->PointTos[pvv].clear();
+                    dfval->PointTos[pvv].insert(dfval->PointTos[gep].begin(),
+                        dfval->PointTos[gep].end());
                 }
-                if (v2->isInBounds()) {
-                    Value *pvv = v2->getPointerOperand();
-                    dfval->PointTos[pvv].insert(dfval->PointTos[v2].begin(),
-                        dfval->PointTos[v2].end());
+            } else if (BitCastInst *Bci = dyn_cast<BitCastInst>(v2)) {
+                if (isa<Function>(v1)) {
+                    dfval->PointTos[Bci].clear();
+                    dfval->PointTos[Bci].insert(v1);
+                } else {
+
+                    // TODO
                 }
             }
             
             // errs()<<"over store\n";
-        } else if (LoadInst *Li = dyn_cast<LoadInst>(inst)){
-            // errs()<<"start load\n";
-            Value *V2 = Li->getPointerOperand();
-            GetElementPtrInst *v2;
-            if (v2 = dyn_cast<GetElementPtrInst>(V2)) {
-                if (v2->isInBounds()) {
-                    // errs()<<"isinbounds\n";
-                    Value *pvv = v2->getPointerOperand();
-                    dfval->PointTos[v2].insert(dfval->PointTos[pvv].begin(),
-                        dfval->PointTos[pvv].end());
+        } else if (LoadInst *Li = dyn_cast<LoadInst>(inst)){;
+            Value *Pop = Li->getPointerOperand();
+            if (GetElementPtrInst *Gep = dyn_cast<GetElementPtrInst>(Pop)) {
+                if (Gep->isInBounds()) {
+                    Value *pvv = Gep->getPointerOperand();
+                    // pvv->print(errs());
+                        // errs()<<"\n";
+                    if (isa<LoadInst>(pvv)) {
+                        
+                        // dfval->PointTos[].insert(dfval->PointTos[])
+                    } else {
+                        dfval->PointTos[Gep].insert(dfval->PointTos[pvv].begin(),
+                            dfval->PointTos[pvv].end());
+                        dfval->PointTos[Li].insert(dfval->PointTos[Gep].begin(),
+                            dfval->PointTos[Pop].end());
+                    }
                 }
-            }
-            dfval->PointTos[Li].insert(dfval->PointTos[v2].begin(),dfval->PointTos[v2].end());
-            // errs()<<"over load\n";
+                
+            } else if (BitCastInst *Bci = dyn_cast<BitCastInst>(Pop)) {
+
+                // TODO ??
+                dfval->PointTos[Li].insert(dfval->PointTos[Bci].begin(),
+                    dfval->PointTos[Bci].end());
+            } 
         } 
 
     }
