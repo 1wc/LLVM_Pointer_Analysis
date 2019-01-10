@@ -72,7 +72,18 @@ public:
     void compDFVal(Instruction *inst, FunPtrInfo *dfval ) override {
         if (isa<DbgInfoIntrinsic>(inst)) return;
         if (isa<MemIntrinsic>(inst)) return;
-
+        // if (inst->getParent()->getParent()->getName() == "clever") {
+        //             errs()<<"fuck u\n";
+        //             for (std::map<Value *, std::set<Value *>>::iterator it = dfval->PointTos.begin();
+        //                 it != dfval->PointTos.end(); it++) {
+        //                 errs()<<"key issssssssssss "<<it->first->getName()<<"\n";
+        //                 for (std::set<Value *>::iterator tmpit = it->second.begin(); tmpit != it->second.end();
+        //                     tmpit++) {
+        //                     errs()<<(**tmpit)<<"\n";
+        //                 }
+        //                 errs()<<"\n\n";
+        //             }
+        // }
         if (CallInst *CI = dyn_cast<CallInst>(inst)) {
             // process direct call inst
             if (CI->getCalledFunction() != NULL) {
@@ -108,7 +119,9 @@ public:
                             fpi.PointTos[x].insert(y);
                             worklist[callee] = fpi;
                         }
-                    } 
+                    }
+                    worklist[callee].PointTos[x].insert(dfval->PointTos[y].begin(),
+                        dfval->PointTos[y].end());
                 }
             } else {
                 // else, process undirect call inst
@@ -262,6 +275,10 @@ public:
 
         // M.print(errs(), 0);
         for (Function &F : M) {
+            // errs()<<F.getName()<<"\n";
+            // if (F.getName() == "clever") {
+            //     errs()<<"erererererer";
+            // }
             FunPtrInfo initval;
             worklist[&F] = initval;
         }
@@ -270,10 +287,13 @@ public:
         while (worklist.size() > 0) {
             cnt += 1;
             for(std::map<Function *, FunPtrInfo>::iterator it = worklist.begin() ; it != worklist.end() ; it++){
+                if (it->first->getName() == "clever") {
+                    errs()<<"erererererer";
+                }
                 FunPtrVisitor visitor;
                 DataflowResult<FunPtrInfo>::Type result;
                 compForwardDataflow(((*it).first), &visitor, &result, (*it).second);
-                printDataflowResult<FunPtrInfo>(errs(), result);
+                // printDataflowResult<FunPtrInfo>(errs(), result);
                 worklist.erase(it);
             }
         }
