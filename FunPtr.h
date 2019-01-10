@@ -30,7 +30,7 @@ inline raw_ostream &operator<<(raw_ostream &out, const FunPtrInfo &info) {
         for (std::set<Value *>::iterator tmpit = Pointees.begin(); tmpit != Pointees.end();
             ++tmpit)  {
             // out << *(*tmpit) << " ";
-            out << (*tmpit)->getName()<<" ";
+            out << (**tmpit)<<" ";
         }
         out <<"\noverover\n";
     }
@@ -47,11 +47,12 @@ public:
     void merge(FunPtrInfo * dest, const FunPtrInfo & src) override {
         for (std::map<Value *, std::set<Value *>>::const_iterator ptiter = src.PointTos.begin();
             ptiter != src.PointTos.end(); ptiter++) {
-            if(dest->PointTos.find((*ptiter).first) != dest->PointTos.end()){
-                    dest->PointTos[(*ptiter).first].insert((*ptiter).second.begin(),(*ptiter).second.end());
-            } else {
-                    dest->PointTos[(*ptiter).first] = (*ptiter).second;  
-            }
+            // if(dest->PointTos.find((*ptiter).first) != dest->PointTos.end()){
+            //         dest->PointTos[(*ptiter).first].insert((*ptiter).second.begin(),(*ptiter).second.end());
+            // } else {
+            //         dest->PointTos[(*ptiter).first] = (*ptiter).second;  
+            // }
+            dest->PointTos[(*ptiter).first].insert((*ptiter).second.begin(),(*ptiter).second.end());
        }
     }
     void mergeVal(FunPtrInfo *dest, FunPtrInfo * src) {
@@ -117,6 +118,20 @@ public:
                     it != dfval->PointTos[pvv].end(); it++) {
                     if (Function *func = dyn_cast<Function>(*it)) {
                         tmpset.insert(func);
+                    } else {
+                        // tricky
+                        for (std::set<Value *>::iterator cddit = dfval->PointTos[pvv].begin();
+                            cddit != dfval->PointTos[pvv].end(); cddit++) {
+                            if (dfval->PointTos.find(*cddit) != dfval->PointTos.end() && 
+                                dfval->PointTos[*cddit].size() > 0) {
+                                for (std::set<Value *>::iterator vit = dfval->PointTos[*cddit].begin();
+                                    vit != dfval->PointTos[*cddit].end(); vit++) {
+                                    if (Function *func = dyn_cast<Function>(*vit)) {
+                                        tmpset.insert(func);
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 if (indirectCalls.find(CI) != indirectCalls.end()) {
@@ -142,35 +157,27 @@ public:
                 dfval->PointTos[Phi] = pointees;
             }
         } else if (GetElementPtrInst *Gep = dyn_cast<GetElementPtrInst>(inst)) {
+            
             if (Gep->isInBounds()) {
 
                 Value *strc = Gep->getPointerOperand();
-
-                // strc->print(errs());
-                // errs()<<"\n";
-                // Gep->print(errs());
-                // errs()<<"\n\n";
-
                 dfval->PointTos[Gep].insert(strc);
-                // errs()<<"\n start to print\n";
-                // Gep->print(errs());
-                // errs()<<"\n";
-                // for (std::set<Value *>::iterator tmpit = dfval->PointTos[Gep].begin();
-                //     tmpit != dfval->PointTos[Gep].end(); tmpit++) {
-                //     errs()<<(**tmpit)<<"\n";
-                // }
-                // errs()<<"\n";
+                if (Gep->getName() == "p_fptr2") {
+                    errs()<<"caocaocaocaocaco\n";
+                }
             }
         } else if (StoreInst *Si = dyn_cast<StoreInst>(inst)) {
             Value *Vop = Si->getValueOperand();
             Value *Pop = Si->getPointerOperand();
             if (isa<Function>(Vop)) {
                 if (isa<BitCastInst>(Pop)) {
+                    dfval->PointTos[Pop].clear();
                     dfval->PointTos[Pop].insert(Vop);
                 } else {
                     std::set<Value *> tmpset = dfval->PointTos[Pop];
                     for (std::set<Value *>::iterator tmpit = tmpset.begin(); tmpit != tmpset.end();
                         tmpit++) {
+                        dfval->PointTos[*tmpit].clear();
                         dfval->PointTos[*tmpit].insert(Vop);
                     } 
                 }
@@ -180,12 +187,14 @@ public:
                     std::set<Value *> tmpset = dfval->PointTos[Pop];
                     for (std::set<Value *>::iterator tmpit = tmpset.begin(); tmpit != tmpset.end();
                         tmpit++) {
+                        dfval->PointTos[*tmpit].clear();
                         dfval->PointTos[*tmpit].insert(Vop);
                     } 
                 } else {
                     std::set<Value *> tmpset = dfval->PointTos[Pop];
                     for (std::set<Value *>::iterator tmpit = tmpset.begin(); tmpit != tmpset.end();
                         tmpit++) {
+                        dfval->PointTos[*tmpit].clear();
                         dfval->PointTos[*tmpit].insert(dfval->PointTos[Vop].begin(),
                             dfval->PointTos[Vop].end());
                     } 

@@ -107,7 +107,7 @@ void compForwardDataflow(Function *fn,
 
         (*result)[bb].first = bbentryval;
         visitor->compDFVal(bb, &bbentryval, true);
-
+        
         // If ingoing value changed, propagate it along the CFG
         if (bbentryval == (*result)[bb].second) continue;
         (*result)[bb].second = bbentryval;
@@ -115,6 +115,18 @@ void compForwardDataflow(Function *fn,
         for (succ_iterator si = succ_begin(bb), se = succ_begin(bb); si != se; si++) {
             worklist.insert(*si);
         }
+        // if (bb->getName() == "if.then") {
+        //     errs()<<"fuck u\n";
+        //     for (std::map<Value *, std::set<Value *>>::iterator it = bbentryval.PointTos.begin();
+        //         it != bbentryval.PointTos.end(); it++) {
+        //         errs()<<"key issssssssssss "<<it->first->getName()<<"\n";
+        //         for (std::set<Value *>::iterator tmpit = it->second.begin(); tmpit != it->second.end();
+        //             tmpit++) {
+        //             errs()<<(**tmpit)<<"\n";
+        //         }
+        //         errs()<<"\n\n";
+        //     }
+        // }
     }
 }
 
