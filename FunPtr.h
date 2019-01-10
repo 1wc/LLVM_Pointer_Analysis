@@ -35,7 +35,8 @@ inline raw_ostream &operator<<(raw_ostream &out, const FunPtrInfo &info) {
     }
     return out;
 }
-std::vector<CallInst *> directCalls;
+std::set<CallInst *> directCalls;
+std::map<CallInst *, std::set<Function *>> indirectCalls;
 std::map<Function *, FunPtrInfo> worklist;
 
 class FunPtrVisitor : public DataflowVisitor<struct FunPtrInfo>{
@@ -43,7 +44,8 @@ class FunPtrVisitor : public DataflowVisitor<struct FunPtrInfo>{
 public:
     FunPtrVisitor() {}
     void merge(FunPtrInfo * dest, const FunPtrInfo & src) override {
-        for (std::map<Value *, std::set<Value *>>::const_iterator ptiter = src.PointTos.begin(); ptiter != src.PointTos.end(); ptiter++) {
+        for (std::map<Value *, std::set<Value *>>::const_iterator ptiter = src.PointTos.begin();
+            ptiter != src.PointTos.end(); ptiter++) {
             if(dest->PointTos.find((*ptiter).first) != dest->PointTos.end()){
                     dest->PointTos[(*ptiter).first].insert((*ptiter).second.begin(),(*ptiter).second.end());
             } else {
@@ -70,7 +72,7 @@ public:
         if (CallInst *CI = dyn_cast<CallInst>(inst)) {
             // process direct call inst
             if (CI->getCalledFunction() != NULL) {
-                directCalls.push_back(CI);
+                directCalls.insert(CI);
                 // process args passed
                 Function *callee = CI->getCalledFunction();
                 
@@ -82,22 +84,8 @@ public:
                     Value *x = &*argit;
                     // x xingcan
                     // y shican
-                    // errs()<<"\nxxxxxxxxxxxxxxxxxxxxx is\n";
-                    // errs()<< (*x);
-                    // errs()<<"\nyyyyyyyyyyyyyyyyyyyyyy is\n";
-                    // errs()<< (*y);
-                    // errs()<<"\n";
                     FunPtrInfo fpi;
                     if (PHINode *Phi = dyn_cast<PHINode>(y)) {
-                        // unsigned num = Phi->getNumIncomingValues();
-                        // for (unsigned i = 0; i < num; ++i) {
-                        //     Value *v = Phi->getIncomingValue(i);
-                        //     if (v->getType()->isFunctionTy() || v->getType()->isPointerTy()) {
-                        //         if (v->getName() == "null") continue;
-                        //         // errs()<<*v;
-                        //         dfval->PointTos[x].insert(v);
-                        //     }
-                        // }
                         // errs()<<"isisisis in ???";
                         // for (std::set<Value *>::iterator tmpit = dfval->PointTos[y].begin(); tmpit != dfval->PointTos[y].end();
                         //     tmpit++) {
@@ -117,12 +105,6 @@ public:
                             worklist[callee] = fpi;
                         }
                     } else if (x->getType()->isPointerTy()) {
-                        // dfval->PointTos[x].clear();
-                        // dfval->PointTos[x].insert(y);
-                        // dfval->PointTos[x].insert(dfval->PointTos[y].begin(), 
-                        //     dfval->PointTos[y].end());
-
-
                         if (worklist.find(callee) != worklist.end()) {
                             worklist[callee].PointTos[x].insert(y);
                         } else {
@@ -132,7 +114,21 @@ public:
                     } 
                 }
             } else {
-            // else, process undirect call inst
+                // else, process undirect call inst
+                Value *pvv = CI->getCalledValue();
+                std::set<Function *> tmpset;
+                for (std::set<Value *>::iterator it = dfval->PointTos[pvv].begin(); 
+                    it != dfval->PointTos[pvv].end(); it++) {
+
+                    if (Function *func = dyn_cast<Function>(*it)) {
+                        tmpset.insert(func);
+                    }
+                }
+                if (indirectCalls.find(CI) != indirectCalls.end()) {
+                    indirectCalls[CI].insert(tmpset.begin(), tmpset.end());
+                } else {
+                    indirectCalls[CI] = tmpset;
+                }
 
             }
             
@@ -148,7 +144,6 @@ public:
                 }
             }
             if (pointees.size() != 0) {
-                errs()<<"dooooooooooooooooooooooooooooooooo\n";
                 dfval->PointTos[Phi] = pointees;
             }
         }
@@ -164,9 +159,19 @@ public:
     FuncPtrPass() : ModulePass(ID) {}
 
     void printRes() {
-        for (std::vector<CallInst *>::iterator it = directCalls.begin(); it != directCalls.end();
-            it++) {
+        for (std::set<CallInst *>::iterator it = directCalls.begin();
+            it != directCalls.end(); it++) {
             errs()<<getLineNo(*it)<<": "<<(*it)->getCalledFunction()->getName()<<"\n";
+        }
+
+        for (std::map<CallInst *, std::set<Function *>>::iterator it = indirectCalls.begin();
+            it != indirectCalls.end(); it++) {
+            errs()<<getLineNo(it->first)<<": ";
+            for (std::set<Function *>::iterator fit = it->second.begin(); fit != it->second.end();
+                fit++) {
+                errs()<<(*fit)->getName()<<" ";
+            }
+            errs()<<"\n";
         }
     }
     unsigned getLineNo(Instruction *I) {
@@ -192,14 +197,13 @@ public:
             worklist[&F] = initval;
         }
         int cnt = 0;
-        // while (cnt < 10) {
         while (worklist.size() > 0) {
             cnt += 1;
             for(std::map<Function *, FunPtrInfo>::iterator it = worklist.begin() ; it != worklist.end() ; it++){
                 FunPtrVisitor visitor;
                 DataflowResult<FunPtrInfo>::Type result;
                 compForwardDataflow(((*it).first), &visitor, &result, (*it).second);
-                printDataflowResult<FunPtrInfo>(errs(), result);
+                // printDataflowResult<FunPtrInfo>(errs(), result);
                 worklist.erase(it);
             }
         }
