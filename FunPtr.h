@@ -89,13 +89,6 @@ public:
                     // y shican
                     FunPtrInfo fpi;
                     if (PHINode *Phi = dyn_cast<PHINode>(y)) {
-                        // errs()<<"isisisis in ???";
-                        // for (std::set<Value *>::iterator tmpit = dfval->PointTos[y].begin(); tmpit != dfval->PointTos[y].end();
-                        //     tmpit++) {
-                        //     errs()<<(*tmpit)<<"\n";
-                        // }
-                        // errs()<<(*CI);
-                        // errs()<<dfval->PointTos[y].size()<<"\n";
                         dfval->PointTos[x].insert(dfval->PointTos[y].begin(), 
                             dfval->PointTos[y].end());
 
@@ -120,13 +113,19 @@ public:
                 // else, process undirect call inst
                 Value *pvv = CI->getCalledValue();
                 std::set<Function *> tmpset;
+                CI->print(errs());
+                errs()<<"\n";
+                pvv->print(errs());
+                errs()<<"\n";
                 for (std::set<Value *>::iterator it = dfval->PointTos[pvv].begin(); 
                     it != dfval->PointTos[pvv].end(); it++) {
 
+                    errs()<<(**it)<<"\n";
                     if (Function *func = dyn_cast<Function>(*it)) {
                         tmpset.insert(func);
                     }
                 }
+                errs()<<"over\n";
                 if (indirectCalls.find(CI) != indirectCalls.end()) {
                     indirectCalls[CI].insert(tmpset.begin(), tmpset.end());
                 } else {
@@ -162,15 +161,18 @@ public:
                         dfval->PointTos[gep].clear();
                         dfval->PointTos[gep].insert(v1);
                     } else if (isa<AllocaInst>(v1)) {
-                        // gep->print(errs());
-                        // errs()<<"\n";
-                        // v1->print(errs());
-                        // errs()<<"\n\n";
                         dfval->PointTos[gep].clear();
                         dfval->PointTos[gep].insert(dfval->PointTos[v1].begin(),
                             dfval->PointTos[v1].end());
-
+                        // for (std::set<Value *>::iterator tmpit = dfval->PointTos[gep].begin();
+                        //     tmpit != dfval->PointTos[gep].end(); tmpit++) {
+                        //     errs()<<(*tmpit)<<"\n";
+                        // }
                     } else {
+                        gep->print(errs());
+                        errs()<<"\n";
+                        v1->print(errs());
+                        errs()<<"\n\n";
                         dfval->PointTos[gep].insert(dfval->PointTos[v1].begin(),dfval->PointTos[v1].end());
                     }
                     dfval->PointTos[pvv].clear();
@@ -263,13 +265,14 @@ public:
             worklist[&F] = initval;
         }
         int cnt = 0;
+        // while (cnt < 10) {
         while (worklist.size() > 0) {
             cnt += 1;
             for(std::map<Function *, FunPtrInfo>::iterator it = worklist.begin() ; it != worklist.end() ; it++){
                 FunPtrVisitor visitor;
                 DataflowResult<FunPtrInfo>::Type result;
                 compForwardDataflow(((*it).first), &visitor, &result, (*it).second);
-                printDataflowResult<FunPtrInfo>(errs(), result);
+                // printDataflowResult<FunPtrInfo>(errs(), result);
                 worklist.erase(it);
             }
         }
