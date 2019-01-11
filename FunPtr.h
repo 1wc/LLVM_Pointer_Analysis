@@ -71,15 +71,15 @@ public:
         }
     }
 
-    std::set<Value *> getRetVal(CallInst *callinst, FunPtrInfo * dfval){
-        std::set<Value *> retset;
+    std::map<Function* ,std::set<Value *>> getRetVal(CallInst *callin, FunPtrInfo * dfval){
+        std::map<Function* ,std::set<Value *>> retmap;
         if(callin->getCalledFunction() != NULL){
             Function* callfunc = callin->getCalledFunction();
             Value *retval;
             for (inst_iterator ii = inst_begin(callfunc); ii != inst_end(callfunc); ++ii) {
                 if (ReturnInst *ri = dyn_cast<ReturnInst>(&*ii)) {
                     retval = ri->getReturnValue();
-                    retset.insert(retval);
+                    retmap[callfunc].insert(retval);
                     break;
                 }
             }
@@ -88,18 +88,19 @@ public:
             Value * callf = callin->getCalledValue();
             for (std::set<Value *>::iterator it = dfval->PointTos[callf].begin(); 
                 it != dfval->PointTos[callf].end(); it++) {
+                Value *retval;
                 if (Function *func = dyn_cast<Function>(*it)) {
                     for (inst_iterator ii = inst_begin(func); ii != inst_end(func); ++ii) {
                         if (ReturnInst *ri = dyn_cast<ReturnInst>(&*ii)) {
                         retval = ri->getReturnValue();
-                        retset.insert(retval);
+                        retmap[func].insert(retval);
                         break;
                         }
                     }
                 }
             }
         }
-        return retset;
+        return retmap;
     }
 
     void compDFVal(Instruction *inst, FunPtrInfo *dfval ) override {
@@ -147,48 +148,18 @@ public:
                 // else, process undirect call inst
                 Value *pvv = CI->getCalledValue();
                 std::set<Function *> tmpset;
-
-
-                
-
-
+                std::map<Function* ,std::set<Value *>> retmap;
 
                 if(CallInst *callin = dyn_cast<CallInst>(pvv)){
-                    Function* callfunc = callin->getCalledFunction();
-                    Value *retval;
-                    if (callfunc != NULL){
-                        for (inst_iterator ii = inst_begin(callfunc); ii != inst_end(callfunc); ++ii) {
-                            if (ReturnInst *ri = dyn_cast<ReturnInst>(&*ii)) {
-                                retval = ri->getReturnValue();
-                                break;
-                            }
-                        }
-                        dfval->PointTos[pvv].insert(worklist[callfunc].PointTos[retval].begin(),
-                    worklist[callfunc].PointTos[retval].end());
-                        // for (std::set<Value *>::iterator tmpit = dfval->PointTos[retval].begin(); tmpit != dfval->PointTos[retval].end();
-                        //     tmpit++) {
-                        //     errs()<<(**tmpit)<<"\n";
-                        // }
-                        // errs()<<"\n\n";
-                    } else {
-                        Value * callf = callin->getCalledValue();
-                        for (std::set<Value *>::iterator it = dfval->PointTos[callf].begin(); 
-                    it != dfval->PointTos[callf].end(); it++) {
-                            // errs()<< (**it) << '\n';
-                            if (Function *func = dyn_cast<Function>(*it)) {
-                                for (inst_iterator ii = inst_begin(func); ii != inst_end(func); ++ii) {
-                                    if (ReturnInst *ri = dyn_cast<ReturnInst>(&*ii)) {
-                                    retval = ri->getReturnValue();
-                                    break;
-                                    }
-                                }
-                                dfval->PointTos[pvv].insert(worklist[func].PointTos[retval].begin(),
-                                worklist[func].PointTos[retval].end());
-                            }
+                    retmap = getRetVal(callin, dfval);
+                    for(std::map<Function* ,std::set<Value *>>::iterator it = retmap.begin(); it!=retmap.end(); it++){
+                        for(std::set<Value *>::iterator init = ((*it).second).begin(); init != ((*it).second).end(); init++){
+                            dfval->PointTos[pvv].insert(worklist[(*it).first].PointTos[*init].begin(),
+                            worklist[(*it).first].PointTos[*init].end());
                         }
                     }
-
                 }
+
                 for (std::set<Value *>::iterator it = dfval->PointTos[pvv].begin(); 
                     it != dfval->PointTos[pvv].end(); it++) {
                     if (Function *func = dyn_cast<Function>(*it)) {
