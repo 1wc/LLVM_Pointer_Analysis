@@ -100,26 +100,13 @@ public:
                     Value *x = &*argit;
                     // x xingcan
                     // y shican
-                    FunPtrInfo fpi;
                     if (PHINode *Phi = dyn_cast<PHINode>(y)) {
                         dfval->PointTos[x].insert(dfval->PointTos[y].begin(), 
                             dfval->PointTos[y].end());
-
-                        if (worklist.find(callee) != worklist.end()) {
-                            worklist[callee].PointTos[x].insert(dfval->PointTos[x].begin(), 
-                                dfval->PointTos[x].end());
-                        } else {
-                            fpi.PointTos[x].insert(dfval->PointTos[x].begin(), 
-                                dfval->PointTos[x].end());
-                            worklist[callee] = fpi;
-                        }
+                        worklist[callee].PointTos[x].insert(dfval->PointTos[x].begin(), 
+                            dfval->PointTos[x].end());
                     } else if (x->getType()->isPointerTy()) {
-                        if (worklist.find(callee) != worklist.end()) {
-                            worklist[callee].PointTos[x].insert(y);
-                        } else {
-                            fpi.PointTos[x].insert(y);
-                            worklist[callee] = fpi;
-                        }
+                        worklist[callee].PointTos[x].insert(y);
                     }
                     worklist[callee].PointTos[x].insert(dfval->PointTos[y].begin(),
                         dfval->PointTos[y].end());
@@ -139,20 +126,14 @@ public:
                                 break;
                             }
                         }
+                        // for (std::set<Value *>::iterator tmpit = dfval->PointTos[retval].begin(); tmpit != dfval->PointTos[retval].end();
+                        //     tmpit++) {
+                        //     errs()<<(**tmpit)<<"\n";
+                        // }
+                        // errs()<<"\n\n";
 
-                    // for (std::map<Value *, std::set<Value *>>::iterator it = dfval->PointTos.begin();
-                        // it != dfval->PointTos.end(); it++) {
-                        // errs()<<"key issssssssssss "<<it->first->getName()<<"\n";
-                        for (std::set<Value *>::iterator tmpit = dfval->PointTos[retval].begin(); tmpit != dfval->PointTos[retval].end();
-                            tmpit++) {
-                            errs()<<(**tmpit)<<"\n";
-                        }
-                        errs()<<"\n\n";
-                    // }
-
-
-                        dfval->PointTos[pvv].insert(dfval->PointTos[retval].begin(),
-                            dfval->PointTos[retval].end());
+                        dfval->PointTos[pvv].insert(worklist[func].PointTos[retval].begin(),
+                            worklist[func].PointTos[retval].end());
                         }
                 }
                 for (std::set<Value *>::iterator it = dfval->PointTos[pvv].begin(); 
@@ -183,6 +164,8 @@ public:
 
             }
             
+        } else if (ReturnInst *Ri = dyn_cast<ReturnInst>(inst)) {
+            // errs()<<"deal with return inst\n";
         } else if (PHINode *Phi = dyn_cast<PHINode>(inst)) {
             std::set<Value *> pointees;
             unsigned num = Phi->getNumIncomingValues();
@@ -303,21 +286,15 @@ public:
 
         // M.print(errs(), 0);
         for (Function &F : M) {
-            // errs()<<F.getName()<<"\n";
-            // if (F.getName() == "clever") {
-            //     errs()<<"erererererer";
-            // }
             FunPtrInfo initval;
             worklist[&F] = initval;
         }
-        // int cnt = 0;
-        // while (cnt < 10) {
+        // for(std::map<Function *, FunPtrInfo>::iterator it = worklist.begin() ; it != worklist.end() ; it++) {
+        //     errs()<<"firstly have "<<it->first->getName()<<"\n";
+        // }
+        errs()<<"\n";
         while (worklist.size() > 0) {
-            // cnt += 1;
             for(std::map<Function *, FunPtrInfo>::iterator it = worklist.begin() ; it != worklist.end() ; it++){
-                // if (it->first->getName() == "clever") {
-                //     errs()<<"erererererer";
-                // }
                 FunPtrVisitor visitor;
                 DataflowResult<FunPtrInfo>::Type result;
                 compForwardDataflow(((*it).first), &visitor, &result, (*it).second);
@@ -326,7 +303,6 @@ public:
             }
         }
         printRes();
-        // errs()<<"iterate for "<<cnt<<"times\n";
         return false;
     }
 };

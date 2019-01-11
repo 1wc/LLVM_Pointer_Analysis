@@ -86,18 +86,18 @@ void compForwardDataflow(Function *fn,
 
     std::set<BasicBlock *> worklist;
 
+
     // Initialize the worklist.
     for (Function::iterator bi = fn->begin(); bi != fn->end(); ++bi) {
         BasicBlock *bb = &*bi;
         result->insert(std::make_pair(bb, std::make_pair(initval, initval)));
         worklist.insert(bb);
     }
-
     // Iteratively compute the dataflow result
     while (!worklist.empty()) {
         BasicBlock *bb = *worklist.begin();
         worklist.erase(worklist.begin());
-
+        
         // Merge all outcoming value
         T bbentryval = (*result)[bb].first;
         for (auto pi = pred_begin(bb), pe = pred_end(bb); pi != pe; pi++) {
@@ -106,6 +106,23 @@ void compForwardDataflow(Function *fn,
         }
 
         (*result)[bb].first = bbentryval;
+        if (fn->getName() == "foo") {
+            errs()<<"deal bb ";
+            bb->print(errs());
+            if (bb->getParent()->getName() == "foo") {
+                errs()<<"fuck u\n";
+                for (std::map<Value *, std::set<Value *>>::iterator it = bbentryval.PointTos.begin();
+                    it != bbentryval.PointTos.end(); it++) {
+                    errs()<<"key issssssssssss "<<it->first->getName()<<"\nvalues are:\n";
+                    for (std::set<Value *>::iterator tmpit = it->second.begin(); tmpit != it->second.end();
+                        tmpit++) {
+
+                        errs()<<(**tmpit)<<"\n";
+                    }
+                    errs()<<"\n\n";
+                }
+            }
+        }
         visitor->compDFVal(bb, &bbentryval, true);
         
         // If ingoing value changed, propagate it along the CFG
@@ -115,7 +132,8 @@ void compForwardDataflow(Function *fn,
         for (succ_iterator si = succ_begin(bb), se = succ_begin(bb); si != se; si++) {
             worklist.insert(*si);
         }
-        // if (bb->getName() == "if.then") {
+
+        // if (bb->getParent()->getName() == "foo") {
         //     errs()<<"fuck u\n";
         //     for (std::map<Value *, std::set<Value *>>::iterator it = bbentryval.PointTos.begin();
         //         it != bbentryval.PointTos.end(); it++) {
