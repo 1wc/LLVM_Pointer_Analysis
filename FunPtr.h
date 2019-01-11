@@ -1,5 +1,6 @@
 #include <llvm/IR/Function.h>
 #include <llvm/Pass.h>
+#include <llvm/IR/InstIterator.h>
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/IR/IntrinsicInst.h"
 #include "llvm/Support/Debug.h"
@@ -127,6 +128,33 @@ public:
                 // else, process undirect call inst
                 Value *pvv = CI->getCalledValue();
                 std::set<Function *> tmpset;
+
+                if(CallInst *callin = dyn_cast<CallInst>(pvv)){
+                    if (callin->getCalledFunction() != NULL){
+                        Value *retval;
+                        Function* func = callin->getCalledFunction();
+                        for (inst_iterator ii = inst_begin(func); ii != inst_end(func); ++ii) {
+                            if (ReturnInst *ri = dyn_cast<ReturnInst>(&*ii)) {
+                                retval = ri->getReturnValue();
+                                break;
+                            }
+                        }
+
+                    // for (std::map<Value *, std::set<Value *>>::iterator it = dfval->PointTos.begin();
+                        // it != dfval->PointTos.end(); it++) {
+                        // errs()<<"key issssssssssss "<<it->first->getName()<<"\n";
+                        for (std::set<Value *>::iterator tmpit = dfval->PointTos[retval].begin(); tmpit != dfval->PointTos[retval].end();
+                            tmpit++) {
+                            errs()<<(**tmpit)<<"\n";
+                        }
+                        errs()<<"\n\n";
+                    // }
+
+
+                        dfval->PointTos[pvv].insert(dfval->PointTos[retval].begin(),
+                            dfval->PointTos[retval].end());
+                        }
+                }
                 for (std::set<Value *>::iterator it = dfval->PointTos[pvv].begin(); 
                     it != dfval->PointTos[pvv].end(); it++) {
                     if (Function *func = dyn_cast<Function>(*it)) {
@@ -282,14 +310,14 @@ public:
             FunPtrInfo initval;
             worklist[&F] = initval;
         }
-        int cnt = 0;
+        // int cnt = 0;
         // while (cnt < 10) {
         while (worklist.size() > 0) {
-            cnt += 1;
+            // cnt += 1;
             for(std::map<Function *, FunPtrInfo>::iterator it = worklist.begin() ; it != worklist.end() ; it++){
-                if (it->first->getName() == "clever") {
-                    errs()<<"erererererer";
-                }
+                // if (it->first->getName() == "clever") {
+                //     errs()<<"erererererer";
+                // }
                 FunPtrVisitor visitor;
                 DataflowResult<FunPtrInfo>::Type result;
                 compForwardDataflow(((*it).first), &visitor, &result, (*it).second);
@@ -298,7 +326,7 @@ public:
             }
         }
         printRes();
-        errs()<<"iterate for "<<cnt<<"times\n";
+        // errs()<<"iterate for "<<cnt<<"times\n";
         return false;
     }
 };
