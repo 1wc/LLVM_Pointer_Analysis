@@ -70,6 +70,38 @@ public:
             }
         }
     }
+
+    std::set<Value *> getRetVal(CallInst *callinst, FunPtrInfo * dfval){
+        std::set<Value *> retset;
+        if(callin->getCalledFunction() != NULL){
+            Function* callfunc = callin->getCalledFunction();
+            Value *retval;
+            for (inst_iterator ii = inst_begin(callfunc); ii != inst_end(callfunc); ++ii) {
+                if (ReturnInst *ri = dyn_cast<ReturnInst>(&*ii)) {
+                    retval = ri->getReturnValue();
+                    retset.insert(retval);
+                    break;
+                }
+            }
+
+        } else {
+            Value * callf = callin->getCalledValue();
+            for (std::set<Value *>::iterator it = dfval->PointTos[callf].begin(); 
+                it != dfval->PointTos[callf].end(); it++) {
+                if (Function *func = dyn_cast<Function>(*it)) {
+                    for (inst_iterator ii = inst_begin(func); ii != inst_end(func); ++ii) {
+                        if (ReturnInst *ri = dyn_cast<ReturnInst>(&*ii)) {
+                        retval = ri->getReturnValue();
+                        retset.insert(retval);
+                        break;
+                        }
+                    }
+                }
+            }
+        }
+        return retset;
+    }
+
     void compDFVal(Instruction *inst, FunPtrInfo *dfval ) override {
         if (isa<DbgInfoIntrinsic>(inst)) return;
         if (isa<MemIntrinsic>(inst)) return;
@@ -116,25 +148,46 @@ public:
                 Value *pvv = CI->getCalledValue();
                 std::set<Function *> tmpset;
 
+
+                
+
+
+
                 if(CallInst *callin = dyn_cast<CallInst>(pvv)){
-                    if (callin->getCalledFunction() != NULL){
-                        Value *retval;
-                        Function* func = callin->getCalledFunction();
-                        for (inst_iterator ii = inst_begin(func); ii != inst_end(func); ++ii) {
+                    Function* callfunc = callin->getCalledFunction();
+                    Value *retval;
+                    if (callfunc != NULL){
+                        for (inst_iterator ii = inst_begin(callfunc); ii != inst_end(callfunc); ++ii) {
                             if (ReturnInst *ri = dyn_cast<ReturnInst>(&*ii)) {
                                 retval = ri->getReturnValue();
                                 break;
                             }
                         }
+                        dfval->PointTos[pvv].insert(worklist[callfunc].PointTos[retval].begin(),
+                    worklist[callfunc].PointTos[retval].end());
                         // for (std::set<Value *>::iterator tmpit = dfval->PointTos[retval].begin(); tmpit != dfval->PointTos[retval].end();
                         //     tmpit++) {
                         //     errs()<<(**tmpit)<<"\n";
                         // }
                         // errs()<<"\n\n";
-
-                        dfval->PointTos[pvv].insert(worklist[func].PointTos[retval].begin(),
-                            worklist[func].PointTos[retval].end());
+                    } else {
+                        Value * callf = callin->getCalledValue();
+                        for (std::set<Value *>::iterator it = dfval->PointTos[callf].begin(); 
+                    it != dfval->PointTos[callf].end(); it++) {
+                            // errs()<< (**it) << '\n';
+                            if (Function *func = dyn_cast<Function>(*it)) {
+                                for (inst_iterator ii = inst_begin(func); ii != inst_end(func); ++ii) {
+                                    if (ReturnInst *ri = dyn_cast<ReturnInst>(&*ii)) {
+                                    retval = ri->getReturnValue();
+                                    break;
+                                    }
+                                }
+                                dfval->PointTos[pvv].insert(worklist[func].PointTos[retval].begin(),
+                                worklist[func].PointTos[retval].end());
+                            }
                         }
+                    }
+
                 }
                 for (std::set<Value *>::iterator it = dfval->PointTos[pvv].begin(); 
                     it != dfval->PointTos[pvv].end(); it++) {
@@ -153,6 +206,33 @@ public:
                                     }
                                 }
                             }
+                        }
+                    }
+                }
+                // errs()<< *pvv << '\n';
+                for (std::set<Value *>::iterator it = dfval->PointTos[pvv].begin(); 
+                it != dfval->PointTos[pvv].end(); it++) {
+                    // errs()<< **it << '\n';
+                    if (Function *callee = dyn_cast<Function>(*it)){
+                        for (unsigned i = 0;i < CI->getNumArgOperands(); ++i) {
+                            Value *y = CI->getArgOperand(i);    
+                            Function::arg_iterator argit = callee->arg_begin();
+                            argit += i;
+                            Value *x = &*argit;
+                            // x xingcan
+                            // y shican
+                            // errs()<< *x << '\n';
+                            // errs() << *y <<'\n-----';
+                            if (PHINode *Phi = dyn_cast<PHINode>(y)) {
+                                dfval->PointTos[x].insert(dfval->PointTos[y].begin(), 
+                                    dfval->PointTos[y].end());
+                                worklist[callee].PointTos[x].insert(dfval->PointTos[x].begin(), 
+                                    dfval->PointTos[x].end());
+                            } else if (x->getType()->isPointerTy()) {
+                                worklist[callee].PointTos[x].insert(y);
+                            }
+                            worklist[callee].PointTos[x].insert(dfval->PointTos[y].begin(),
+                                dfval->PointTos[y].end());
                         }
                     }
                 }
@@ -284,7 +364,7 @@ public:
   }
     bool runOnModule(Module &M) override {
 
-        // M.print(errs(), 0);
+        M.print(errs(), 0);
         for (Function &F : M) {
             FunPtrInfo initval;
             worklist[&F] = initval;
