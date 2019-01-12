@@ -26,12 +26,12 @@ inline raw_ostream &operator<<(raw_ostream &out, const FunPtrInfo &info) {
         out <<"\nPointer is:\n";
         // out << *(Pointer) << "\n";
 
-        out << (*Pointer)<<"\n";
+        out << (Pointer) << (*Pointer)<<"\n";
         out <<"\nValues are:\n";
         for (std::set<Value *>::iterator tmpit = Pointees.begin(); tmpit != Pointees.end();
             ++tmpit)  {
             // out << *(*tmpit) << " ";
-            out << (**tmpit)<<" ";
+            out << (*tmpit)<< (**tmpit)<<" ";
         }
         out <<"\noverover\n";
     }
@@ -40,6 +40,7 @@ inline raw_ostream &operator<<(raw_ostream &out, const FunPtrInfo &info) {
 std::set<CallInst *> directCalls;
 std::map<CallInst *, std::set<Function *>> indirectCalls;
 std::map<Function *, FunPtrInfo> worklist;
+int it_time = 0;
 
 class FunPtrVisitor : public DataflowVisitor<struct FunPtrInfo>{
 
@@ -48,11 +49,6 @@ public:
     void merge(FunPtrInfo * dest, const FunPtrInfo & src) override {
         for (std::map<Value *, std::set<Value *>>::const_iterator ptiter = src.PointTos.begin();
             ptiter != src.PointTos.end(); ptiter++) {
-            // if(dest->PointTos.find((*ptiter).first) != dest->PointTos.end()){
-            //         dest->PointTos[(*ptiter).first].insert((*ptiter).second.begin(),(*ptiter).second.end());
-            // } else {
-            //         dest->PointTos[(*ptiter).first] = (*ptiter).second;  
-            // }
             dest->PointTos[(*ptiter).first].insert((*ptiter).second.begin(),(*ptiter).second.end());
        }
     }
@@ -138,9 +134,9 @@ public:
                 Value *pvv = CI->getCalledValue();
                 std::set<Function *> tmpset;
                 std::map<Function* ,std::set<Value *>> retmap;
-
                 for (std::set<Value *>::iterator it = dfval->PointTos[pvv].begin(); 
                     it != dfval->PointTos[pvv].end(); it++) {
+                    // errs()<<**it<<"\n";
                     if (Function *func = dyn_cast<Function>(*it)) {
                         tmpset.insert(func);
                     } else {
@@ -159,6 +155,7 @@ public:
                         }
                     }
                 }
+                // errs()<<"over\n\n";
                 for (std::set<Value *>::iterator it = dfval->PointTos[pvv].begin(); 
                 it != dfval->PointTos[pvv].end(); it++) {
                     if (Function *callee = dyn_cast<Function>(*it)){
@@ -170,10 +167,15 @@ public:
                             // x xingcan
                             // y shican
                             if (PHINode *Phi = dyn_cast<PHINode>(y)) {
+                                // TODO ???
                                 dfval->PointTos[x].insert(dfval->PointTos[y].begin(), 
                                     dfval->PointTos[y].end());
                                 worklist[callee].PointTos[x].insert(dfval->PointTos[x].begin(), 
                                     dfval->PointTos[x].end());
+                            } else if (isa<AllocaInst>(y)) {
+                                worklist[callee].PointTos[x].insert(dfval->PointTos[y].begin(),
+                                        dfval->PointTos[y].end());
+                                
                             } else if (x->getType()->isPointerTy()) {
                                 worklist[callee].PointTos[x].insert(y);
                             }
@@ -193,26 +195,36 @@ public:
             retmap = getRetVal(CI, dfval);
             for(std::map<Function* ,std::set<Value *>>::iterator it = retmap.begin(); it!=retmap.end(); it++){
                 for(std::set<Value *>::iterator init = ((*it).second).begin(); init != ((*it).second).end(); init++){
-                    errs()<<(*CI)<<"\n";
+                    for (std::set<Value *>::iterator tit = worklist[(*it).first].PointTos[*init].begin();
+                        tit != worklist[(*it).first].PointTos[*init].end(); tit++) {
+                    }
                     dfval->PointTos[CI].insert(worklist[(*it).first].PointTos[*init].begin(),
-                    worklist[(*it).first].PointTos[*init].end());
+                        worklist[(*it).first].PointTos[*init].end());
+                }
+            }
+        } else if (ReturnInst *Ri = dyn_cast<ReturnInst>(inst)) {
+            if (dfval->PointTos[Ri->getReturnValue()].size() > 0) {
+                for (std::map<CallInst *, std::set<Function *>>::iterator cit = indirectCalls.begin();
+                    cit != indirectCalls.end(); cit++) {
+                    for (std::set<Function *>::iterator fit = cit->second.begin();
+                        fit != cit->second.end(); fit++) {
+                        if (*fit == Ri->getParent()->getParent()) {
+                            // TODO, now we solve this issue by a trick.
+                            it_time += 1;
+                            if (it_time < 5) {
+                                worklist[cit->first->getParent()->getParent()].PointTos[cit->first].insert(
+                                    dfval->PointTos[Ri->getReturnValue()].begin(),dfval->PointTos[Ri->getReturnValue()].end());
+                            }
+                        }
+                    }
                 }
             }
 
-        } else if (ReturnInst *Ri = dyn_cast<ReturnInst>(inst)) {
-            // errs()<<"deal with return inst\n";
         } else if (PHINode *Phi = dyn_cast<PHINode>(inst)) {
-            std::set<Value *> pointees;
             unsigned num = Phi->getNumIncomingValues();
             for (unsigned i = 0; i < num; ++i) {
                 Value *v = Phi->getIncomingValue(i);
-                if (v->getType()->isFunctionTy() || v->getType()->isPointerTy()) {
-                    if (v->getName() == "null") continue;
-                    pointees.insert(v);
-                }
-            }
-            if (pointees.size() != 0) {
-                dfval->PointTos[Phi] = pointees;
+                dfval->PointTos[Phi].insert(v);
             }
         } else if (GetElementPtrInst *Gep = dyn_cast<GetElementPtrInst>(inst)) {
             
@@ -253,10 +265,8 @@ public:
                         dfval->PointTos[*tmpit].insert(dfval->PointTos[Vop].begin(),
                             dfval->PointTos[Vop].end());
                     } 
-                }
-                
+                }        
             }
-            // errs()<<"over store\n";
         } else if (LoadInst *Li = dyn_cast<LoadInst>(inst)){
             Value *Pop = Li->getPointerOperand();
             if (isa<BitCastInst>(Pop)) {
@@ -320,12 +330,10 @@ public:
             FunPtrInfo initval;
             worklist[&F] = initval;
         }
-        // for(std::map<Function *, FunPtrInfo>::iterator it = worklist.begin() ; it != worklist.end() ; it++) {
-        //     errs()<<"firstly have "<<it->first->getName()<<"\n";
-        // }
-        errs()<<"\n";
+        int cnt = 0;
         while (worklist.size() > 0) {
             for(std::map<Function *, FunPtrInfo>::iterator it = worklist.begin() ; it != worklist.end() ; it++){
+                // errs()<<"deal with "<<it->first->getName()<<"\n";
                 FunPtrVisitor visitor;
                 DataflowResult<FunPtrInfo>::Type result;
                 compForwardDataflow(((*it).first), &visitor, &result, (*it).second);

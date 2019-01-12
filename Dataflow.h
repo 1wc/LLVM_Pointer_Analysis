@@ -106,23 +106,6 @@ void compForwardDataflow(Function *fn,
         }
 
         (*result)[bb].first = bbentryval;
-        // if (fn->getName() == "foo") {
-            // errs()<<"deal bb ";
-            // bb->print(errs());
-            // if (bb->getParent()->getName() == "foo") {
-                // errs()<<"fuck u\n";
-                // for (std::map<Value *, std::set<Value *>>::iterator it = bbentryval.PointTos.begin();
-                    // it != bbentryval.PointTos.end(); it++) {
-                    // errs()<<"key issssssssssss "<<it->first->getName()<<"\nvalues are:\n";
-                    // for (std::set<Value *>::iterator tmpit = it->second.begin(); tmpit != it->second.end();
-                    //     tmpit++) {
-
-                    //     errs()<<(**tmpit)<<"\n";
-                    // }
-                    // errs()<<"\n\n";
-                // }
-            // }
-        // }
         visitor->compDFVal(bb, &bbentryval, true);
         
         // If ingoing value changed, propagate it along the CFG
@@ -133,18 +116,6 @@ void compForwardDataflow(Function *fn,
             worklist.insert(*si);
         }
 
-        // if (bb->getParent()->getName() == "foo") {
-        //     errs()<<"fuck u\n";
-        //     for (std::map<Value *, std::set<Value *>>::iterator it = bbentryval.PointTos.begin();
-        //         it != bbentryval.PointTos.end(); it++) {
-        //         errs()<<"key issssssssssss "<<it->first->getName()<<"\n";
-        //         for (std::set<Value *>::iterator tmpit = it->second.begin(); tmpit != it->second.end();
-        //             tmpit++) {
-        //             errs()<<(**tmpit)<<"\n";
-        //         }
-        //         errs()<<"\n\n";
-        //     }
-        // }
     }
 }
 
