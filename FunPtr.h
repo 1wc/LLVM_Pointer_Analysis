@@ -124,6 +124,17 @@ public:
                         worklist[callee].PointTos[x].insert(dfval->PointTos[x].begin(), 
                             dfval->PointTos[x].end());
                     } else if (x->getType()->isPointerTy()) {
+                        errs()<<*x;
+                        errs()<<"point sets are:\n";
+                        for(std::set<Value *>::iterator tmpit = dfval->PointTos[y].begin();
+                            tmpit != dfval->PointTos[y].end(); tmpit++) {
+                            errs()<<**tmpit<<"\n";
+                            worklist[callee].PointTos[*tmpit].insert(dfval->PointTos[*tmpit].begin(),
+                                dfval->PointTos[*tmpit].end());
+                        }
+                        errs()<<"over\n";
+                        // dfval->PointTos[x].insert(dfval->PointTos[y].begin(), 
+                        //     dfval->PointTos[y].end());
                         worklist[callee].PointTos[x].insert(y);
                     }
                     worklist[callee].PointTos[x].insert(dfval->PointTos[y].begin(),
