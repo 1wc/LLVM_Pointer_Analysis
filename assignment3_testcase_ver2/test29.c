@@ -53,7 +53,7 @@ void moo(int x)
 
 // 21 : minus, plus
 // 26 : clever
-// 27 : plus
+// 27 : plus, minus
 // 41 : malloc
 // 46 : foo
 // 51 : foo

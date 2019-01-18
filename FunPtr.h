@@ -25,15 +25,18 @@ inline raw_ostream &operator<<(raw_ostream &out, const FunPtrInfo &info) {
         std::set<Value *> Pointees = it->second;
         out <<"\nPointer is:\n";
         // out << *(Pointer) << "\n";
-
-        out << (Pointer) << (*Pointer)<<"\n";
-        out <<"\nValues are:\n";
-        for (std::set<Value *>::iterator tmpit = Pointees.begin(); tmpit != Pointees.end();
-            ++tmpit)  {
-            // out << *(*tmpit) << " ";
-            out << (*tmpit)<< (**tmpit)<<" ";
+        if (Pointer == NULL) {
+            out <<"is NULL";
+        }else{
+            out << (Pointer) << (*Pointer)<<"\n";
+            out <<"\nValues are:\n";
+            for (std::set<Value *>::iterator tmpit = Pointees.begin(); tmpit != Pointees.end();
+                ++tmpit)  {
+                // out << *(*tmpit) << " ";
+                out << (*tmpit)<< (**tmpit)<<" ";
+            }
+            out <<"\noverover\n";
         }
-        out <<"\noverover\n";
     }
     return out;
 }
@@ -230,6 +233,40 @@ public:
                     }
                 }
             }
+            // iterate functions to find the caller
+            // now we should search on not only directCall but also indirectCall.
+            // errs()<<"circle start\n";
+            for (std::set<CallInst *>::iterator cit = directCalls.begin(); cit != directCalls.end(); cit++) {
+                // if the real arg's data flow value have been changed, pass is to the callee and insert it 
+                // into worklist.
+                Function *caller = (*cit)->getParent()->getParent();
+                Function *callee = (*cit)->getCalledFunction();
+                if (callee == Ri->getParent()->getParent()) {
+                    for (unsigned i = 0;i < (*cit)->getNumArgOperands(); ++i) {
+                        Value *y = (*cit)->getArgOperand(i);    
+                        Function::arg_iterator argit = callee->arg_begin();
+                        argit += i;
+                        Value *x = &*argit;
+                        // x xingcan
+                        // y shican
+                        if (dfval->PointTos.find(x) != dfval->PointTos.end()) {
+                            if (worklist.find(caller) != worklist.end()) {
+                                // errs()<<"caller is in worklist\n";
+                                if (dfval->PointTos[x] != worklist[caller].PointTos[y]) {
+                                    worklist[caller].PointTos[y].insert(dfval->PointTos[x].begin(),
+                                        dfval->PointTos[x].end());
+                                }
+                            } else {
+                                it_time += 1;
+                                if (it_time < 5) {
+                                    worklist[caller].PointTos[y].insert(dfval->PointTos[x].begin(),
+                                        dfval->PointTos[x].end());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
         } else if (PHINode *Phi = dyn_cast<PHINode>(inst)) {
             unsigned num = Phi->getNumIncomingValues();
@@ -348,7 +385,7 @@ public:
                 FunPtrVisitor visitor;
                 DataflowResult<FunPtrInfo>::Type result;
                 compForwardDataflow(((*it).first), &visitor, &result, (*it).second);
-                // printDataflowResult<FunPtrInfo>(errs(), result);
+                printDataflowResult<FunPtrInfo>(errs(), result);
                 worklist.erase(it);
             }
         }

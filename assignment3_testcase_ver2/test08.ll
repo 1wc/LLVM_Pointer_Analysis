@@ -7,81 +7,78 @@ target triple = "x86_64-unknown-linux-gnu"
 %struct.fsptr = type { %struct.fptr* }
 
 ; Function Attrs: noinline nounwind optnone uwtable
-define i32 @plus(i32 %a, i32 %b) #0 !dbg !7 {
-entry:
-  %a.addr = alloca i32, align 4
-  %b.addr = alloca i32, align 4
-  store i32 %a, i32* %a.addr, align 4
-  call void @llvm.dbg.declare(metadata i32* %a.addr, metadata !11, metadata !12), !dbg !13
-  store i32 %b, i32* %b.addr, align 4
-  call void @llvm.dbg.declare(metadata i32* %b.addr, metadata !14, metadata !12), !dbg !15
-  %0 = load i32, i32* %a.addr, align 4, !dbg !16
-  %1 = load i32, i32* %b.addr, align 4, !dbg !17
-  %add = add nsw i32 %0, %1, !dbg !18
-  ret i32 %add, !dbg !19
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  %3 = alloca i32, align 4
+  %4 = alloca i32, align 4
+  store i32 %0, i32* %3, align 4
+  call void @llvm.dbg.declare(metadata i32* %3, metadata !11, metadata !12), !dbg !13
+  store i32 %1, i32* %4, align 4
+  call void @llvm.dbg.declare(metadata i32* %4, metadata !14, metadata !12), !dbg !15
+  %5 = load i32, i32* %3, align 4, !dbg !16
+  %6 = load i32, i32* %4, align 4, !dbg !17
+  %7 = add nsw i32 %5, %6, !dbg !18
+  ret i32 %7, !dbg !19
 }
 
 ; Function Attrs: nounwind readnone speculatable
 declare void @llvm.dbg.declare(metadata, metadata, metadata) #1
 
 ; Function Attrs: noinline nounwind optnone uwtable
-define i32 @minus(i32 %a, i32 %b) #0 !dbg !20 {
-entry:
-  %a.addr = alloca i32, align 4
-  %b.addr = alloca i32, align 4
-  store i32 %a, i32* %a.addr, align 4
-  call void @llvm.dbg.declare(metadata i32* %a.addr, metadata !21, metadata !12), !dbg !22
-  store i32 %b, i32* %b.addr, align 4
-  call void @llvm.dbg.declare(metadata i32* %b.addr, metadata !23, metadata !12), !dbg !24
-  %0 = load i32, i32* %a.addr, align 4, !dbg !25
-  %1 = load i32, i32* %b.addr, align 4, !dbg !26
-  %sub = sub nsw i32 %0, %1, !dbg !27
-  ret i32 %sub, !dbg !28
+define i32 @minus(i32, i32) #0 !dbg !20 {
+  %3 = alloca i32, align 4
+  %4 = alloca i32, align 4
+  store i32 %0, i32* %3, align 4
+  call void @llvm.dbg.declare(metadata i32* %3, metadata !21, metadata !12), !dbg !22
+  store i32 %1, i32* %4, align 4
+  call void @llvm.dbg.declare(metadata i32* %4, metadata !23, metadata !12), !dbg !24
+  %5 = load i32, i32* %3, align 4, !dbg !25
+  %6 = load i32, i32* %4, align 4, !dbg !26
+  %7 = sub nsw i32 %5, %6, !dbg !27
+  ret i32 %7, !dbg !28
 }
 
 ; Function Attrs: noinline nounwind optnone uwtable
-define void @foo(i32 %x) #0 !dbg !29 {
-entry:
-  %x.addr = alloca i32, align 4
-  %a_fptr = alloca %struct.fptr, align 8
-  %s_fptr = alloca %struct.fsptr, align 8
-  store i32 %x, i32* %x.addr, align 4
-  call void @llvm.dbg.declare(metadata i32* %x.addr, metadata !32, metadata !12), !dbg !33
-  call void @llvm.dbg.declare(metadata %struct.fptr* %a_fptr, metadata !34, metadata !12), !dbg !39
-  call void @llvm.dbg.declare(metadata %struct.fsptr* %s_fptr, metadata !40, metadata !12), !dbg !45
-  %sptr = getelementptr inbounds %struct.fsptr, %struct.fsptr* %s_fptr, i32 0, i32 0, !dbg !46
-  store %struct.fptr* %a_fptr, %struct.fptr** %sptr, align 8, !dbg !47
-  %0 = load i32, i32* %x.addr, align 4, !dbg !48
-  %cmp = icmp sgt i32 %0, 1, !dbg !50
-  br i1 %cmp, label %if.then, label %if.else, !dbg !51
+define void @foo(i32) #0 !dbg !29 {
+  %2 = alloca i32, align 4
+  %3 = alloca %struct.fptr, align 8
+  %4 = alloca %struct.fsptr, align 8
+  store i32 %0, i32* %2, align 4
+  call void @llvm.dbg.declare(metadata i32* %2, metadata !32, metadata !12), !dbg !33
+  call void @llvm.dbg.declare(metadata %struct.fptr* %3, metadata !34, metadata !12), !dbg !39
+  call void @llvm.dbg.declare(metadata %struct.fsptr* %4, metadata !40, metadata !12), !dbg !45
+  %5 = getelementptr inbounds %struct.fsptr, %struct.fsptr* %4, i32 0, i32 0, !dbg !46
+  store %struct.fptr* %3, %struct.fptr** %5, align 8, !dbg !47
+  %6 = load i32, i32* %2, align 4, !dbg !48
+  %7 = icmp sgt i32 %6, 1, !dbg !50
+  br i1 %7, label %8, label %17, !dbg !51
 
-if.then:                                          ; preds = %entry
-  %p_fptr = getelementptr inbounds %struct.fptr, %struct.fptr* %a_fptr, i32 0, i32 0, !dbg !52
-  store i32 (i32, i32)* @plus, i32 (i32, i32)** %p_fptr, align 8, !dbg !54
-  %sptr1 = getelementptr inbounds %struct.fsptr, %struct.fsptr* %s_fptr, i32 0, i32 0, !dbg !55
-  %1 = load %struct.fptr*, %struct.fptr** %sptr1, align 8, !dbg !55
-  %p_fptr2 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !56
-  %2 = load i32 (i32, i32)*, i32 (i32, i32)** %p_fptr2, align 8, !dbg !56
-  %3 = load i32, i32* %x.addr, align 4, !dbg !57
-  %call = call i32 %2(i32 1, i32 %3), !dbg !58
-  store i32 %call, i32* %x.addr, align 4, !dbg !59
-  %p_fptr3 = getelementptr inbounds %struct.fptr, %struct.fptr* %a_fptr, i32 0, i32 0, !dbg !60
-  store i32 (i32, i32)* @minus, i32 (i32, i32)** %p_fptr3, align 8, !dbg !61
-  br label %if.end, !dbg !62
+; <label>:8:                                      ; preds = %1
+  %9 = getelementptr inbounds %struct.fptr, %struct.fptr* %3, i32 0, i32 0, !dbg !52
+  store i32 (i32, i32)* @plus, i32 (i32, i32)** %9, align 8, !dbg !54
+  %10 = getelementptr inbounds %struct.fsptr, %struct.fsptr* %4, i32 0, i32 0, !dbg !55
+  %11 = load %struct.fptr*, %struct.fptr** %10, align 8, !dbg !55
+  %12 = getelementptr inbounds %struct.fptr, %struct.fptr* %11, i32 0, i32 0, !dbg !56
+  %13 = load i32 (i32, i32)*, i32 (i32, i32)** %12, align 8, !dbg !56
+  %14 = load i32, i32* %2, align 4, !dbg !57
+  %15 = call i32 %13(i32 1, i32 %14), !dbg !58
+  store i32 %15, i32* %2, align 4, !dbg !59
+  %16 = getelementptr inbounds %struct.fptr, %struct.fptr* %3, i32 0, i32 0, !dbg !60
+  store i32 (i32, i32)* @minus, i32 (i32, i32)** %16, align 8, !dbg !61
+  br label %21, !dbg !62
 
-if.else:                                          ; preds = %entry
-  %sptr4 = getelementptr inbounds %struct.fsptr, %struct.fsptr* %s_fptr, i32 0, i32 0, !dbg !63
-  %4 = load %struct.fptr*, %struct.fptr** %sptr4, align 8, !dbg !63
-  %p_fptr5 = getelementptr inbounds %struct.fptr, %struct.fptr* %4, i32 0, i32 0, !dbg !65
-  store i32 (i32, i32)* @minus, i32 (i32, i32)** %p_fptr5, align 8, !dbg !66
-  br label %if.end
+; <label>:17:                                     ; preds = %1
+  %18 = getelementptr inbounds %struct.fsptr, %struct.fsptr* %4, i32 0, i32 0, !dbg !63
+  %19 = load %struct.fptr*, %struct.fptr** %18, align 8, !dbg !63
+  %20 = getelementptr inbounds %struct.fptr, %struct.fptr* %19, i32 0, i32 0, !dbg !65
+  store i32 (i32, i32)* @minus, i32 (i32, i32)** %20, align 8, !dbg !66
+  br label %21
 
-if.end:                                           ; preds = %if.else, %if.then
-  %p_fptr6 = getelementptr inbounds %struct.fptr, %struct.fptr* %a_fptr, i32 0, i32 0, !dbg !67
-  %5 = load i32 (i32, i32)*, i32 (i32, i32)** %p_fptr6, align 8, !dbg !67
-  %6 = load i32, i32* %x.addr, align 4, !dbg !68
-  %call7 = call i32 %5(i32 1, i32 %6), !dbg !69
-  store i32 %call7, i32* %x.addr, align 4, !dbg !70
+; <label>:21:                                     ; preds = %17, %8
+  %22 = getelementptr inbounds %struct.fptr, %struct.fptr* %3, i32 0, i32 0, !dbg !67
+  %23 = load i32 (i32, i32)*, i32 (i32, i32)** %22, align 8, !dbg !67
+  %24 = load i32, i32* %2, align 4, !dbg !68
+  %25 = call i32 %23(i32 1, i32 %24), !dbg !69
+  store i32 %25, i32* %2, align 4, !dbg !70
   ret void, !dbg !71
 }
 
@@ -92,13 +89,13 @@ attributes #1 = { nounwind readnone speculatable }
 !llvm.module.flags = !{!3, !4, !5}
 !llvm.ident = !{!6}
 
-!0 = distinct !DICompileUnit(language: DW_LANG_C99, file: !1, producer: "clang version 5.0.0 (tags/RELEASE_500/final)", isOptimized: false, runtimeVersion: 0, emissionKind: FullDebug, enums: !2)
-!1 = !DIFile(filename: "test08.c", directory: "/home/liwc/llvm-assignment/assignment3_testcase_ver2")
+!0 = distinct !DICompileUnit(language: DW_LANG_C99, file: !1, producer: "clang version 5.0.1 (tags/RELEASE_501/final)", isOptimized: false, runtimeVersion: 0, emissionKind: FullDebug, enums: !2)
+!1 = !DIFile(filename: "test08.c", directory: "/home/nevv/llvm-assignment/assignment3_testcase_ver2")
 !2 = !{}
 !3 = !{i32 2, !"Dwarf Version", i32 4}
 !4 = !{i32 2, !"Debug Info Version", i32 3}
 !5 = !{i32 1, !"wchar_size", i32 4}
-!6 = !{!"clang version 5.0.0 (tags/RELEASE_500/final)"}
+!6 = !{!"clang version 5.0.1 (tags/RELEASE_501/final)"}
 !7 = distinct !DISubprogram(name: "plus", scope: !1, file: !1, line: 10, type: !8, isLocal: false, isDefinition: true, scopeLine: 10, flags: DIFlagPrototyped, isOptimized: false, unit: !0, variables: !2)
 !8 = !DISubroutineType(types: !9)
 !9 = !{!10, !10, !10}

@@ -4,146 +4,141 @@ target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-unknown-linux-gnu"
 
 ; Function Attrs: noinline nounwind optnone uwtable
-define i32 @plus(i32 %a, i32 %b) #0 !dbg !13 {
-entry:
-  %a.addr = alloca i32, align 4
-  %b.addr = alloca i32, align 4
-  store i32 %a, i32* %a.addr, align 4
-  call void @llvm.dbg.declare(metadata i32* %a.addr, metadata !14, metadata !15), !dbg !16
-  store i32 %b, i32* %b.addr, align 4
-  call void @llvm.dbg.declare(metadata i32* %b.addr, metadata !17, metadata !15), !dbg !18
-  %0 = load i32, i32* %a.addr, align 4, !dbg !19
-  %1 = load i32, i32* %b.addr, align 4, !dbg !20
-  %add = add nsw i32 %0, %1, !dbg !21
-  ret i32 %add, !dbg !22
+define i32 @plus(i32, i32) #0 !dbg !13 {
+  %3 = alloca i32, align 4
+  %4 = alloca i32, align 4
+  store i32 %0, i32* %3, align 4
+  call void @llvm.dbg.declare(metadata i32* %3, metadata !14, metadata !15), !dbg !16
+  store i32 %1, i32* %4, align 4
+  call void @llvm.dbg.declare(metadata i32* %4, metadata !17, metadata !15), !dbg !18
+  %5 = load i32, i32* %3, align 4, !dbg !19
+  %6 = load i32, i32* %4, align 4, !dbg !20
+  %7 = add nsw i32 %5, %6, !dbg !21
+  ret i32 %7, !dbg !22
 }
 
 ; Function Attrs: nounwind readnone speculatable
 declare void @llvm.dbg.declare(metadata, metadata, metadata) #1
 
 ; Function Attrs: noinline nounwind optnone uwtable
-define i32 @minus(i32 %a, i32 %b) #0 !dbg !23 {
-entry:
-  %a.addr = alloca i32, align 4
-  %b.addr = alloca i32, align 4
-  store i32 %a, i32* %a.addr, align 4
-  call void @llvm.dbg.declare(metadata i32* %a.addr, metadata !24, metadata !15), !dbg !25
-  store i32 %b, i32* %b.addr, align 4
-  call void @llvm.dbg.declare(metadata i32* %b.addr, metadata !26, metadata !15), !dbg !27
-  %0 = load i32, i32* %a.addr, align 4, !dbg !28
-  %1 = load i32, i32* %b.addr, align 4, !dbg !29
-  %sub = sub nsw i32 %0, %1, !dbg !30
-  ret i32 %sub, !dbg !31
+define i32 @minus(i32, i32) #0 !dbg !23 {
+  %3 = alloca i32, align 4
+  %4 = alloca i32, align 4
+  store i32 %0, i32* %3, align 4
+  call void @llvm.dbg.declare(metadata i32* %3, metadata !24, metadata !15), !dbg !25
+  store i32 %1, i32* %4, align 4
+  call void @llvm.dbg.declare(metadata i32* %4, metadata !26, metadata !15), !dbg !27
+  %5 = load i32, i32* %3, align 4, !dbg !28
+  %6 = load i32, i32* %4, align 4, !dbg !29
+  %7 = sub nsw i32 %5, %6, !dbg !30
+  ret i32 %7, !dbg !31
 }
 
 ; Function Attrs: noinline nounwind optnone uwtable
-define i32 (i32, i32)* @foo(i32 %a, i32 %b, i32 (i32, i32)* %a_fptr, i32 (i32, i32)* %b_fptr) #0 !dbg !32 {
-entry:
-  %a.addr = alloca i32, align 4
-  %b.addr = alloca i32, align 4
-  %a_fptr.addr = alloca i32 (i32, i32)*, align 8
-  %b_fptr.addr = alloca i32 (i32, i32)*, align 8
-  store i32 %a, i32* %a.addr, align 4
-  call void @llvm.dbg.declare(metadata i32* %a.addr, metadata !35, metadata !15), !dbg !36
-  store i32 %b, i32* %b.addr, align 4
-  call void @llvm.dbg.declare(metadata i32* %b.addr, metadata !37, metadata !15), !dbg !38
-  store i32 (i32, i32)* %a_fptr, i32 (i32, i32)** %a_fptr.addr, align 8
-  call void @llvm.dbg.declare(metadata i32 (i32, i32)** %a_fptr.addr, metadata !39, metadata !15), !dbg !40
-  store i32 (i32, i32)* %b_fptr, i32 (i32, i32)** %b_fptr.addr, align 8
-  call void @llvm.dbg.declare(metadata i32 (i32, i32)** %b_fptr.addr, metadata !41, metadata !15), !dbg !42
-  %0 = load i32 (i32, i32)*, i32 (i32, i32)** %a_fptr.addr, align 8, !dbg !43
-  ret i32 (i32, i32)* %0, !dbg !44
+define i32 (i32, i32)* @foo(i32, i32, i32 (i32, i32)*, i32 (i32, i32)*) #0 !dbg !32 {
+  %5 = alloca i32, align 4
+  %6 = alloca i32, align 4
+  %7 = alloca i32 (i32, i32)*, align 8
+  %8 = alloca i32 (i32, i32)*, align 8
+  store i32 %0, i32* %5, align 4
+  call void @llvm.dbg.declare(metadata i32* %5, metadata !35, metadata !15), !dbg !36
+  store i32 %1, i32* %6, align 4
+  call void @llvm.dbg.declare(metadata i32* %6, metadata !37, metadata !15), !dbg !38
+  store i32 (i32, i32)* %2, i32 (i32, i32)** %7, align 8
+  call void @llvm.dbg.declare(metadata i32 (i32, i32)** %7, metadata !39, metadata !15), !dbg !40
+  store i32 (i32, i32)* %3, i32 (i32, i32)** %8, align 8
+  call void @llvm.dbg.declare(metadata i32 (i32, i32)** %8, metadata !41, metadata !15), !dbg !42
+  %9 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !43
+  ret i32 (i32, i32)* %9, !dbg !44
 }
 
 ; Function Attrs: noinline nounwind optnone uwtable
-define i32 @clever(i32 %a, i32 %b, i32 (i32, i32)* %a_fptr, i32 (i32, i32)** %b_fptr) #0 !dbg !45 {
-entry:
-  %a.addr = alloca i32, align 4
-  %b.addr = alloca i32, align 4
-  %a_fptr.addr = alloca i32 (i32, i32)*, align 8
-  %b_fptr.addr = alloca i32 (i32, i32)**, align 8
-  %s_fptr = alloca i32 (i32, i32)*, align 8
-  store i32 %a, i32* %a.addr, align 4
-  call void @llvm.dbg.declare(metadata i32* %a.addr, metadata !48, metadata !15), !dbg !49
-  store i32 %b, i32* %b.addr, align 4
-  call void @llvm.dbg.declare(metadata i32* %b.addr, metadata !50, metadata !15), !dbg !51
-  store i32 (i32, i32)* %a_fptr, i32 (i32, i32)** %a_fptr.addr, align 8
-  call void @llvm.dbg.declare(metadata i32 (i32, i32)** %a_fptr.addr, metadata !52, metadata !15), !dbg !53
-  store i32 (i32, i32)** %b_fptr, i32 (i32, i32)*** %b_fptr.addr, align 8
-  call void @llvm.dbg.declare(metadata i32 (i32, i32)*** %b_fptr.addr, metadata !54, metadata !15), !dbg !55
-  call void @llvm.dbg.declare(metadata i32 (i32, i32)** %s_fptr, metadata !56, metadata !15), !dbg !57
-  %0 = load i32, i32* %a.addr, align 4, !dbg !58
-  %1 = load i32, i32* %b.addr, align 4, !dbg !59
-  %2 = load i32 (i32, i32)*, i32 (i32, i32)** %a_fptr.addr, align 8, !dbg !60
-  %3 = load i32 (i32, i32)**, i32 (i32, i32)*** %b_fptr.addr, align 8, !dbg !61
-  %4 = load i32 (i32, i32)*, i32 (i32, i32)** %3, align 8, !dbg !62
-  %call = call i32 (i32, i32)* @foo(i32 %0, i32 %1, i32 (i32, i32)* %2, i32 (i32, i32)* %4), !dbg !63
-  store i32 (i32, i32)* %call, i32 (i32, i32)** %s_fptr, align 8, !dbg !64
-  %5 = load i32 (i32, i32)*, i32 (i32, i32)** %s_fptr, align 8, !dbg !65
-  %6 = load i32, i32* %a.addr, align 4, !dbg !66
-  %7 = load i32, i32* %b.addr, align 4, !dbg !67
-  %call1 = call i32 %5(i32 %6, i32 %7), !dbg !65
-  ret i32 %call1, !dbg !68
+define i32 @clever(i32, i32, i32 (i32, i32)*, i32 (i32, i32)**) #0 !dbg !45 {
+  %5 = alloca i32, align 4
+  %6 = alloca i32, align 4
+  %7 = alloca i32 (i32, i32)*, align 8
+  %8 = alloca i32 (i32, i32)**, align 8
+  %9 = alloca i32 (i32, i32)*, align 8
+  store i32 %0, i32* %5, align 4
+  call void @llvm.dbg.declare(metadata i32* %5, metadata !48, metadata !15), !dbg !49
+  store i32 %1, i32* %6, align 4
+  call void @llvm.dbg.declare(metadata i32* %6, metadata !50, metadata !15), !dbg !51
+  store i32 (i32, i32)* %2, i32 (i32, i32)** %7, align 8
+  call void @llvm.dbg.declare(metadata i32 (i32, i32)** %7, metadata !52, metadata !15), !dbg !53
+  store i32 (i32, i32)** %3, i32 (i32, i32)*** %8, align 8
+  call void @llvm.dbg.declare(metadata i32 (i32, i32)*** %8, metadata !54, metadata !15), !dbg !55
+  call void @llvm.dbg.declare(metadata i32 (i32, i32)** %9, metadata !56, metadata !15), !dbg !57
+  %10 = load i32, i32* %5, align 4, !dbg !58
+  %11 = load i32, i32* %6, align 4, !dbg !59
+  %12 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !60
+  %13 = load i32 (i32, i32)**, i32 (i32, i32)*** %8, align 8, !dbg !61
+  %14 = load i32 (i32, i32)*, i32 (i32, i32)** %13, align 8, !dbg !62
+  %15 = call i32 (i32, i32)* @foo(i32 %10, i32 %11, i32 (i32, i32)* %12, i32 (i32, i32)* %14), !dbg !63
+  store i32 (i32, i32)* %15, i32 (i32, i32)** %9, align 8, !dbg !64
+  %16 = load i32 (i32, i32)*, i32 (i32, i32)** %9, align 8, !dbg !65
+  %17 = load i32, i32* %5, align 4, !dbg !66
+  %18 = load i32, i32* %6, align 4, !dbg !67
+  %19 = call i32 %16(i32 %17, i32 %18), !dbg !65
+  ret i32 %19, !dbg !68
 }
 
 ; Function Attrs: noinline nounwind optnone uwtable
-define i32 @moo(i8 signext %x, i32 %op1, i32 %op2) #0 !dbg !69 {
-entry:
-  %x.addr = alloca i8, align 1
-  %op1.addr = alloca i32, align 4
-  %op2.addr = alloca i32, align 4
-  %a_fptr = alloca i32 (i32, i32)*, align 8
-  %s_fptr = alloca i32 (i32, i32)*, align 8
-  %t_fptr = alloca i32 (i32, i32)**, align 8
-  %result = alloca i32, align 4
-  store i8 %x, i8* %x.addr, align 1
-  call void @llvm.dbg.declare(metadata i8* %x.addr, metadata !73, metadata !15), !dbg !74
-  store i32 %op1, i32* %op1.addr, align 4
-  call void @llvm.dbg.declare(metadata i32* %op1.addr, metadata !75, metadata !15), !dbg !76
-  store i32 %op2, i32* %op2.addr, align 4
-  call void @llvm.dbg.declare(metadata i32* %op2.addr, metadata !77, metadata !15), !dbg !78
-  call void @llvm.dbg.declare(metadata i32 (i32, i32)** %a_fptr, metadata !79, metadata !15), !dbg !80
-  store i32 (i32, i32)* @plus, i32 (i32, i32)** %a_fptr, align 8, !dbg !80
-  call void @llvm.dbg.declare(metadata i32 (i32, i32)** %s_fptr, metadata !81, metadata !15), !dbg !82
-  store i32 (i32, i32)* @minus, i32 (i32, i32)** %s_fptr, align 8, !dbg !82
-  call void @llvm.dbg.declare(metadata i32 (i32, i32)*** %t_fptr, metadata !83, metadata !15), !dbg !84
-  %call = call noalias i8* @malloc(i64 8) #3, !dbg !85
-  %0 = bitcast i8* %call to i32 (i32, i32)**, !dbg !86
-  store i32 (i32, i32)** %0, i32 (i32, i32)*** %t_fptr, align 8, !dbg !84
-  %1 = load i8, i8* %x.addr, align 1, !dbg !87
-  %conv = sext i8 %1 to i32, !dbg !87
-  %cmp = icmp eq i32 %conv, 43, !dbg !89
-  br i1 %cmp, label %if.then, label %if.else, !dbg !90
+define i32 @moo(i8 signext, i32, i32) #0 !dbg !69 {
+  %4 = alloca i8, align 1
+  %5 = alloca i32, align 4
+  %6 = alloca i32, align 4
+  %7 = alloca i32 (i32, i32)*, align 8
+  %8 = alloca i32 (i32, i32)*, align 8
+  %9 = alloca i32 (i32, i32)**, align 8
+  %10 = alloca i32, align 4
+  store i8 %0, i8* %4, align 1
+  call void @llvm.dbg.declare(metadata i8* %4, metadata !73, metadata !15), !dbg !74
+  store i32 %1, i32* %5, align 4
+  call void @llvm.dbg.declare(metadata i32* %5, metadata !75, metadata !15), !dbg !76
+  store i32 %2, i32* %6, align 4
+  call void @llvm.dbg.declare(metadata i32* %6, metadata !77, metadata !15), !dbg !78
+  call void @llvm.dbg.declare(metadata i32 (i32, i32)** %7, metadata !79, metadata !15), !dbg !80
+  store i32 (i32, i32)* @plus, i32 (i32, i32)** %7, align 8, !dbg !80
+  call void @llvm.dbg.declare(metadata i32 (i32, i32)** %8, metadata !81, metadata !15), !dbg !82
+  store i32 (i32, i32)* @minus, i32 (i32, i32)** %8, align 8, !dbg !82
+  call void @llvm.dbg.declare(metadata i32 (i32, i32)*** %9, metadata !83, metadata !15), !dbg !84
+  %11 = call noalias i8* @malloc(i64 8) #3, !dbg !85
+  %12 = bitcast i8* %11 to i32 (i32, i32)**, !dbg !86
+  store i32 (i32, i32)** %12, i32 (i32, i32)*** %9, align 8, !dbg !84
+  %13 = load i8, i8* %4, align 1, !dbg !87
+  %14 = sext i8 %13 to i32, !dbg !87
+  %15 = icmp eq i32 %14, 43, !dbg !89
+  br i1 %15, label %16, label %19, !dbg !90
 
-if.then:                                          ; preds = %entry
-  %2 = load i32 (i32, i32)*, i32 (i32, i32)** %a_fptr, align 8, !dbg !91
-  %3 = load i32 (i32, i32)**, i32 (i32, i32)*** %t_fptr, align 8, !dbg !93
-  store i32 (i32, i32)* %2, i32 (i32, i32)** %3, align 8, !dbg !94
-  br label %if.end6, !dbg !95
+; <label>:16:                                     ; preds = %3
+  %17 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !91
+  %18 = load i32 (i32, i32)**, i32 (i32, i32)*** %9, align 8, !dbg !93
+  store i32 (i32, i32)* %17, i32 (i32, i32)** %18, align 8, !dbg !94
+  br label %27, !dbg !95
 
-if.else:                                          ; preds = %entry
-  %4 = load i8, i8* %x.addr, align 1, !dbg !96
-  %conv2 = sext i8 %4 to i32, !dbg !96
-  %cmp3 = icmp eq i32 %conv2, 45, !dbg !98
-  br i1 %cmp3, label %if.then5, label %if.end, !dbg !99
+; <label>:19:                                     ; preds = %3
+  %20 = load i8, i8* %4, align 1, !dbg !96
+  %21 = sext i8 %20 to i32, !dbg !96
+  %22 = icmp eq i32 %21, 45, !dbg !98
+  br i1 %22, label %23, label %26, !dbg !99
 
-if.then5:                                         ; preds = %if.else
-  %5 = load i32 (i32, i32)*, i32 (i32, i32)** %s_fptr, align 8, !dbg !100
-  %6 = load i32 (i32, i32)**, i32 (i32, i32)*** %t_fptr, align 8, !dbg !102
-  store i32 (i32, i32)* %5, i32 (i32, i32)** %6, align 8, !dbg !103
-  br label %if.end, !dbg !104
+; <label>:23:                                     ; preds = %19
+  %24 = load i32 (i32, i32)*, i32 (i32, i32)** %8, align 8, !dbg !100
+  %25 = load i32 (i32, i32)**, i32 (i32, i32)*** %9, align 8, !dbg !102
+  store i32 (i32, i32)* %24, i32 (i32, i32)** %25, align 8, !dbg !103
+  br label %26, !dbg !104
 
-if.end:                                           ; preds = %if.then5, %if.else
-  br label %if.end6
+; <label>:26:                                     ; preds = %23, %19
+  br label %27
 
-if.end6:                                          ; preds = %if.end, %if.then
-  call void @llvm.dbg.declare(metadata i32* %result, metadata !105, metadata !15), !dbg !107
-  %7 = load i32, i32* %op1.addr, align 4, !dbg !108
-  %8 = load i32, i32* %op2.addr, align 4, !dbg !109
-  %9 = load i32 (i32, i32)*, i32 (i32, i32)** %a_fptr, align 8, !dbg !110
-  %10 = load i32 (i32, i32)**, i32 (i32, i32)*** %t_fptr, align 8, !dbg !111
-  %call7 = call i32 @clever(i32 %7, i32 %8, i32 (i32, i32)* %9, i32 (i32, i32)** %10), !dbg !112
-  store i32 %call7, i32* %result, align 4, !dbg !107
+; <label>:27:                                     ; preds = %26, %16
+  call void @llvm.dbg.declare(metadata i32* %10, metadata !105, metadata !15), !dbg !107
+  %28 = load i32, i32* %5, align 4, !dbg !108
+  %29 = load i32, i32* %6, align 4, !dbg !109
+  %30 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !110
+  %31 = load i32 (i32, i32)**, i32 (i32, i32)*** %9, align 8, !dbg !111
+  %32 = call i32 @clever(i32 %28, i32 %29, i32 (i32, i32)* %30, i32 (i32, i32)** %31), !dbg !112
+  store i32 %32, i32* %10, align 4, !dbg !107
   ret i32 0, !dbg !113
 }
 
@@ -159,8 +154,8 @@ attributes #3 = { nounwind }
 !llvm.module.flags = !{!9, !10, !11}
 !llvm.ident = !{!12}
 
-!0 = distinct !DICompileUnit(language: DW_LANG_C99, file: !1, producer: "clang version 5.0.0 (tags/RELEASE_500/final)", isOptimized: false, runtimeVersion: 0, emissionKind: FullDebug, enums: !2, retainedTypes: !3)
-!1 = !DIFile(filename: "test16.c", directory: "/home/liwc/llvm-assignment/assignment3_testcase_ver2")
+!0 = distinct !DICompileUnit(language: DW_LANG_C99, file: !1, producer: "clang version 5.0.1 (tags/RELEASE_501/final)", isOptimized: false, runtimeVersion: 0, emissionKind: FullDebug, enums: !2, retainedTypes: !3)
+!1 = !DIFile(filename: "test16.c", directory: "/home/nevv/llvm-assignment/assignment3_testcase_ver2")
 !2 = !{}
 !3 = !{!4}
 !4 = !DIDerivedType(tag: DW_TAG_pointer_type, baseType: !5, size: 64)
@@ -171,7 +166,7 @@ attributes #3 = { nounwind }
 !9 = !{i32 2, !"Dwarf Version", i32 4}
 !10 = !{i32 2, !"Debug Info Version", i32 3}
 !11 = !{i32 1, !"wchar_size", i32 4}
-!12 = !{!"clang version 5.0.0 (tags/RELEASE_500/final)"}
+!12 = !{!"clang version 5.0.1 (tags/RELEASE_501/final)"}
 !13 = distinct !DISubprogram(name: "plus", scope: !1, file: !1, line: 2, type: !6, isLocal: false, isDefinition: true, scopeLine: 2, flags: DIFlagPrototyped, isOptimized: false, unit: !0, variables: !2)
 !14 = !DILocalVariable(name: "a", arg: 1, scope: !13, file: !1, line: 2, type: !8)
 !15 = !DIExpression()
@@ -264,12 +259,12 @@ attributes #3 = { nounwind }
 !102 = !DILocation(line: 30, column: 9, scope: !101)
 !103 = !DILocation(line: 30, column: 16, scope: !101)
 !104 = !DILocation(line: 31, column: 5, scope: !101)
-!105 = !DILocalVariable(name: "result", scope: !69, file: !1, line: 33, type: !106)
+!105 = !DILocalVariable(name: "result", scope: !69, file: !1, line: 32, type: !106)
 !106 = !DIBasicType(name: "unsigned int", size: 32, encoding: DW_ATE_unsigned)
-!107 = !DILocation(line: 33, column: 14, scope: !69)
-!108 = !DILocation(line: 33, column: 30, scope: !69)
-!109 = !DILocation(line: 33, column: 35, scope: !69)
-!110 = !DILocation(line: 33, column: 40, scope: !69)
-!111 = !DILocation(line: 33, column: 48, scope: !69)
-!112 = !DILocation(line: 33, column: 23, scope: !69)
-!113 = !DILocation(line: 34, column: 5, scope: !69)
+!107 = !DILocation(line: 32, column: 14, scope: !69)
+!108 = !DILocation(line: 32, column: 30, scope: !69)
+!109 = !DILocation(line: 32, column: 35, scope: !69)
+!110 = !DILocation(line: 32, column: 40, scope: !69)
+!111 = !DILocation(line: 32, column: 48, scope: !69)
+!112 = !DILocation(line: 32, column: 23, scope: !69)
+!113 = !DILocation(line: 33, column: 5, scope: !69)

@@ -89,7 +89,6 @@ int moo(char x, int op1, int op2) {
 
 // 27 : minus
 // 38 : foo
-// 67 : make_simple_alias 
 // 70 : make_simple_alias
 // 75 : make_alias
 // 81 : clever

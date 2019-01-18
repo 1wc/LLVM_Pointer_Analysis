@@ -38,12 +38,11 @@ int moo(char x, int op1, int op2) {
     else if (x == '-') {
        goo_ptr = clever;
     }
-
     t_fptr = goo_ptr(op1, op2, &a_fptr, &s_fptr);
     t_fptr(op1, op2);
     
     return 0;
 }
 
-// 32 : foo, clever
-// 43 : plus, minus
+// 41 : foo, clever
+// 42 : plus, minus
