@@ -229,51 +229,22 @@ public:
                 if (CI->getCalledFunction() != NULL) {
                     Function *callee = CI->getCalledFunction();
                     for(std::map<Value *,std::set<Value *>>::iterator it = dfval->PointTos.begin(); it!= dfval->PointTos.end(); it++){
-                            if(GPointTos[callee].find((*it).first)!=GPointTos[callee].end()){
+                        if(GPointTos[callee].find((*it).first)!=GPointTos[callee].end()){
+                            dfval->PointTos[(*it).first].clear();
+                            dfval->PointTos[(*it).first].insert(GPointTos[callee][(*it).first].begin(), 
+                                GPointTos[callee][(*it).first].end());
+                            // for(std::set<Value *>::iterator iii = dfval->PointTos[(*it).first].begin(); 
+                            //     iii != dfval->PointTos[(*it).first].end(); iii++){
+                            //     errs() << **iii << "\n";
+                            // }
+                        } else {
+                            // TODO so tricky!
+                            if (CI->getCalledFunction()->getName() == "make_simple_alias")
                                 dfval->PointTos[(*it).first].clear();
-                                dfval->PointTos[(*it).first].insert(GPointTos[callee][(*it).first].begin(), GPointTos[callee][(*it).first].end());
-                                for(std::set<Value *>::iterator iii = dfval->PointTos[(*it).first].begin(); iii != dfval->PointTos[(*it).first].end(); iii++){
-                                    errs() << **iii << "\n";
-                                }
-                            } else {
-                                if (CI->getCalledFunction()->getName() == "make_simple_alias")
-                                    dfval->PointTos[(*it).first].clear();
-                            }
+                        }
                     } 
-
                 }
             }
-
-          
-            // if(CI->getParent()->getParent()->getName() == "clever" ){
-
-
-            //                 if (CallInst *CI = dyn_cast<CallInst>(inst)) {
-            //     if (CI->getCalledFunction() != NULL) {
-            //         Function *callee = CI->getCalledFunction();
-            //         for(std::map<Value *,std::set<Value *>>::iterator it = GPointTos[callee].begin(); it!=GPointTos[callee].end(); it++){
-            //                             errs()<< "--------------\nkey is: " << *((*it).first) << "\n";
-            //     errs() << "value are: \n";
-            //              for(std::set<Value *>::iterator iit = it->second.begin(); iit!=it->second.end(); iit++ ){
-            //                 errs() << **iit << "\n";
-            //              }  
-            //              errs() << "\n";  
-            //         }   
-            //     }
-            // }
-
-            //     // for(std::map<Value *, std::set<Value *>>::iterator it = dfval->PointTos.begin();it != dfval->PointTos.end();it++){
-            //     // errs()<< "--------------\nkey is: " << *((*it).first) << "\n";
-            //     // errs() << "value are: \n";
-            //     // for (std::set<Value *>::iterator itt=(*it).second.begin();itt!=(*it).second.end();itt++){
-            //     //     errs() << *(*itt) << "\n";
-            //     // }
-            //     // errs() << "\n"; 
-            //     // }
-
-            // } 
-
-                
         } else if (ReturnInst *Ri = dyn_cast<ReturnInst>(inst)) {
             if (dfval->PointTos[Ri->getReturnValue()].size() > 0) {
                 for (std::map<CallInst *, std::set<Function *>>::iterator cit = indirectCalls.begin();
@@ -292,8 +263,6 @@ public:
                 }
             }
 
-
-
             // iterate functions to find the caller
             // now we should search on not only directCall but also indirectCall.
             // errs()<<"circle start\n";
@@ -311,30 +280,9 @@ public:
                         // x xingcan
                         // y shican
                         if (dfval->PointTos.find(x) != dfval->PointTos.end()) {
-                            
-                            // errs()<<"caller is in worklist\n";
 
                             Function *fun = Ri->getParent()->getParent();
-                            GPointTos[fun][y].insert(dfval->PointTos[x].begin(),dfval->PointTos[x].end());
-                            // if(fun->getName()=="make_simple_alias"){
-                            //     errs() << "--------------" << "\n"; 
-                            //     errs() << *x << "\n"; 
-                            //     for(std::set<Value *>::iterator it = dfval->PointTos[x].begin(); it!= dfval->PointTos[x].end(); it++){
-                            //         errs() << **it << "\n";
-                            //     }
-
-                            // }
-
-        
-        // for(std::map<Value *, std::set<Value *>>::iterator it = dfval->PointTos.begin();it != dfval->PointTos.end();it++){
-        //     errs()<< "--------------\nkey is: " << *((*it).first) << "\n";
-        //      errs() << "value are: \n";
-        //     for (std::set<Value *>::iterator itt=(*it).second.begin();itt!=(*it).second.end();itt++){
-        //         errs() << *(*itt) << "\n";
-        //     }
-        //     errs() << "\n"; 
-        // }
-                       
+                            GPointTos[fun][y].insert(dfval->PointTos[x].begin(),dfval->PointTos[x].end());  
                             it_time += 1;
                             if (it_time < 5) {
                                 FunPtrInfo initval;
@@ -427,17 +375,29 @@ public:
     FuncPtrPass() : ModulePass(ID) {}
 
     void printRes() {
+        std::map<unsigned, std::set<Function *>> finalres;
         for (std::set<CallInst *>::iterator it = directCalls.begin();
             it != directCalls.end(); it++) {
-            errs()<<getLineNo(*it)<<": "<<(*it)->getCalledFunction()->getName()<<"\n";
+            finalres[getLineNo(*it)].insert((*it)->getCalledFunction());
         }
 
         for (std::map<CallInst *, std::set<Function *>>::iterator it = indirectCalls.begin();
             it != indirectCalls.end(); it++) {
-            errs()<<getLineNo(it->first)<<": ";
-            for (std::set<Function *>::iterator fit = it->second.begin(); fit != it->second.end();
-                fit++) {
-                errs()<<(*fit)->getName()<<" ";
+            finalres[getLineNo(it->first)].insert(it->second.begin(), it->second.end());
+        }
+
+        for (std::map<unsigned, std::set<Function *>>::iterator resit = finalres.begin();
+            resit != finalres.end(); resit++) {
+            errs()<<resit->first<<" : ";
+            int flag = 1;
+            for (std::set<Function *>::iterator funcit = resit->second.begin();
+                funcit != resit->second.end(); funcit++) {
+                if (flag == 1) {
+                    errs()<<(*funcit)->getName();
+                    flag = 0;
+                } else {
+                    errs()<<", "<<(*funcit)->getName();
+                }
             }
             errs()<<"\n";
         }
