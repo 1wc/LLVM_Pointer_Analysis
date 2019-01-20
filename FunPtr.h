@@ -46,7 +46,6 @@ std::map<Function *, FunPtrInfo> worklist;
 
 // store the data flow after function iterator.
 std::map<Function * ,std::map<Value *, std::set<Value *>>> GPointTos;
-// std::map<Function *, std::map<Value *, std::set<Value *>>> extraPointTos;
 
 int it_time = 0;
 
@@ -96,9 +95,9 @@ public:
                 if (Function *func = dyn_cast<Function>(*it)) {
                     for (inst_iterator ii = inst_begin(func); ii != inst_end(func); ++ii) {
                         if (ReturnInst *ri = dyn_cast<ReturnInst>(&*ii)) {
-                        retval = ri->getReturnValue();
-                        retmap[func].insert(retval);
-                        break;
+                            retval = ri->getReturnValue();
+                            retmap[func].insert(retval);
+                            break;
                         }
                     }
                 }
@@ -152,7 +151,7 @@ public:
                 
                 // TODO
                 // test for case 26
-                // pass all the dataflow value to callee and into GPointTos
+                // pass all the dataflow value to callee
                 for (std::map<Value *, std::set<Value *>>::iterator it = dfval->PointTos.begin();
                     it != dfval->PointTos.end(); it++) {
                     worklist[callee].PointTos[it->first].insert(it->second.begin(),
@@ -163,11 +162,11 @@ public:
             } else {
                 // else, process undirect call inst
                 Value *pvv = CI->getCalledValue();
+                // errs()<<*pvv<<"\n";
                 std::set<Function *> tmpset;
                 std::map<Function* ,std::set<Value *>> retmap;
                 for (std::set<Value *>::iterator it = dfval->PointTos[pvv].begin(); 
                     it != dfval->PointTos[pvv].end(); it++) {
-                    // errs()<<**it<<"\n";
                     if (Function *func = dyn_cast<Function>(*it)) {
                         tmpset.insert(func);
                     } else {
@@ -190,6 +189,7 @@ public:
                 for (std::set<Value *>::iterator it = dfval->PointTos[pvv].begin(); 
                 it != dfval->PointTos[pvv].end(); it++) {
                     if (Function *callee = dyn_cast<Function>(*it)){
+                        // errs()<<callee->getName()<<"\n";
                         for (unsigned i = 0;i < CI->getNumArgOperands(); ++i) {
                             Value *y = CI->getArgOperand(i);    
                             Function::arg_iterator argit = callee->arg_begin();
@@ -213,26 +213,32 @@ public:
                             worklist[callee].PointTos[x].insert(dfval->PointTos[y].begin(),
                                 dfval->PointTos[y].end());
                         }
+                        // like case 26, pass arg
+                        for (std::map<Value *, std::set<Value *>>::iterator iit = dfval->PointTos.begin();
+                            iit != dfval->PointTos.end(); iit++) {
+                            worklist[callee].PointTos[iit->first].insert(iit->second.begin(),
+                                iit->second.end());
+                        }
                     }
                 }
-                if (indirectCalls.find(CI) != indirectCalls.end()) {
-                    indirectCalls[CI].insert(tmpset.begin(), tmpset.end());
-                } else {
-                    indirectCalls[CI] = tmpset;
-                }
+
+                // solve case 26, clear the wrong result
+                indirectCalls[CI].clear();
+                indirectCalls[CI].insert(tmpset.begin(), tmpset.end());
+     
 
             }
             std::map<Function* ,std::set<Value *>> retmap;
             retmap = getRetVal(CI, dfval);
             for(std::map<Function* ,std::set<Value *>>::iterator it = retmap.begin(); it!=retmap.end(); it++){
-                for(std::set<Value *>::iterator init = ((*it).second).begin(); init != ((*it).second).end(); init++){
-                    for (std::set<Value *>::iterator tit = worklist[(*it).first].PointTos[*init].begin();
-                        tit != worklist[(*it).first].PointTos[*init].end(); tit++) {
-                    }
-                    dfval->PointTos[CI].insert(worklist[(*it).first].PointTos[*init].begin(),
-                        worklist[(*it).first].PointTos[*init].end());
+                for(std::set<Value *>::iterator init = it->second.begin(); init != it->second.end(); init++){
+                    if (worklist[it->first].PointTos[*init].begin() != worklist[it->first].PointTos[*init].end())
+                        dfval->PointTos[CI].insert(worklist[it->first].PointTos[*init].begin(),
+                            worklist[it->first].PointTos[*init].end());
+
                 }
             }
+            // errs()<<"overover\n\n";
 
             if (CI->getCalledFunction() != NULL) {
                 Function *callee = CI->getCalledFunction();
@@ -248,35 +254,12 @@ public:
                     }
                 }
                 
-
                 for (std::map<Value *, std::set<Value *>>::iterator it = GPointTos[callee].begin();
                     it != GPointTos[callee].end(); it++) {
-                    // errs()<<"point is "<<*(it->first)<<"\n";
                     dfval->PointTos[it->first].clear();
-                    // errs()<<"values are\n";
-                    // for (std::set<Value *>::iterator iit = it->second.begin(); iit != it->second.end(); iit++) {
-                    //     errs()<<**iit<<"\n";
-                    // }
-                    // errs()<<"end for point "<<*(it->first)<<"\n\n";
                     dfval->PointTos[it->first].insert(it->second.begin(), it->second.end());
                 }
-                // pass all the dfval
-                // For case 26
-
-
-
-                // for(std::map<Value *,std::set<Value *>>::iterator it = dfval->PointTos.begin(); 
-                //     it!= dfval->PointTos.end(); it++){
-                //     if(GPointTos[callee].find((*it).first)!=GPointTos[callee].end()){
-                //         dfval->PointTos[(*it).first].clear();
-                //         dfval->PointTos[(*it).first].insert(GPointTos[callee][(*it).first].begin(), 
-                //             GPointTos[callee][(*it).first].end());
-                //     } else {
-                //         dfval->PointTos[(*it).first].clear();
-                //     }
-                // } 
-
-                // errs()<<"overover\n---------------------------------\n";
+                
             }
         } else if (ReturnInst *Ri = dyn_cast<ReturnInst>(inst)) {
             if (dfval->PointTos[Ri->getReturnValue()].size() > 0) {
@@ -288,8 +271,13 @@ public:
                             // TODO, now we solve this issue by a trick.
                             it_time += 1;
                             if (it_time < 5) {
-                                worklist[cit->first->getParent()->getParent()].PointTos[cit->first].insert(
-                                    dfval->PointTos[Ri->getReturnValue()].begin(),dfval->PointTos[Ri->getReturnValue()].end());
+
+                                // solve 30 & 20, pass all dlval to caller
+                                for (std::map<Value *, std::set<Value *>>::iterator mapit = dfval->PointTos.begin();
+                                    mapit != dfval->PointTos.end(); mapit++) {
+                                    worklist[cit->first->getParent()->getParent()].PointTos[mapit->first].insert(mapit->second.begin(),
+                                        mapit->second.end());
+                                }
                             }
                         }
                     }
@@ -335,24 +323,7 @@ public:
                         }
                     }
                     // we should pass all the dfval into GPoint except the xingcan
-                    // Too much trouble
-
-                    // for (std::map<Value *, std::set<Value *>>::iterator it = dfval->PointTos.begin();
-                    //     it != dfval->PointTos.end(); it++) {
-                    //     int flag = 0;
-                    //     for (unsigned i = 0;i < (*cit)->getNumArgOperands(); ++i) {   
-                    //         Function::arg_iterator argit = callee->arg_begin();
-                    //         argit += i;
-                    //         Value *x = &*argit;
-                    //         if (it->first == x) {
-                    //             flag = 1;
-                    //             break;
-                    //         }
-                    //     }
-                    //     if (!flag) {
-                    //         GPointTos[callee][it->first].insert(it->second.begin(),it->second.end());
-                    //     }
-                    // }
+                    // Too much trouble, refuse.
                 }
             }
         } else if (PHINode *Phi = dyn_cast<PHINode>(inst)) {
@@ -452,7 +423,7 @@ public:
                             for (std::set<Value *>::iterator it = dfval->PointTos[li].begin();
                                 it != dfval->PointTos[li].end(); it++) {
                                 if (isa<BitCastInst>(*it)) {
-                                    
+
                                     for (std::set<Value *>::iterator iit = dfval->PointTos[*it].begin();
                                         iit != dfval->PointTos[*it].end(); iit++) {
                                         for (std::set<Value *>::iterator iiit = dfval->PointTos[*iit].begin();
