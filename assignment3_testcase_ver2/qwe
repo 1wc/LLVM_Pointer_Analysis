@@ -1,0 +1,2384 @@
+deal with llvm.dbg.value
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+deal with llvm.dbg.declare
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+deal with minus
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = sub nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+
+	in : 
+	out :  
+Pointer is:
+0x20260b0  %3 = sub nsw i32 %0, %1, !dbg !16
+
+Values are:
+
+overover
+
+deal with foo
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  %4 = alloca %struct.fptr, align 8
+  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %4, i32 0, i32 0
+  store i32 (i32, i32)* %2, i32 (i32, i32)** %5, align 8
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !17, metadata !18), !dbg !19
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !20, metadata !18), !dbg !21
+  call void @llvm.dbg.declare(metadata %struct.fptr* %4, metadata !22, metadata !18), !dbg !23
+  %6 = getelementptr inbounds %struct.fptr, %struct.fptr* %4, i32 0, i32 0, !dbg !24
+  %7 = load i32 (i32, i32)*, i32 (i32, i32)** %6, align 8, !dbg !24
+  %8 = call i32 %7(i32 %0, i32 %1), !dbg !25
+  ret i32 %8, !dbg !26
+
+	in : 
+	out :  
+Pointer is:
+0x2026200i32 (i32, i32)* %2
+
+Values are:
+
+overover
+
+Pointer is:
+0x20262c8  %4 = alloca %struct.fptr, align 8
+
+Values are:
+
+overover
+
+Pointer is:
+0x2026418  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %4, i32 0, i32 0
+
+Values are:
+0x20262c8  %4 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x2026d48  %6 = getelementptr inbounds %struct.fptr, %struct.fptr* %4, i32 0, i32 0, !dbg !24
+
+Values are:
+0x20262c8  %4 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x2026de8  %7 = load i32 (i32, i32)*, i32 (i32, i32)** %6, align 8, !dbg !24
+
+Values are:
+
+overover
+
+Pointer is:
+0x2026f98  %8 = call i32 %7(i32 %0, i32 %1), !dbg !25
+
+Values are:
+
+overover
+
+deal with make_simple_alias
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  call void @llvm.dbg.value(metadata %struct.fptr* %0, i64 0, metadata !18, metadata !19), !dbg !20
+  call void @llvm.dbg.value(metadata %struct.fptr* %1, i64 0, metadata !21, metadata !19), !dbg !22
+  %3 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !23
+  %4 = load i32 (i32, i32)*, i32 (i32, i32)** %3, align 8, !dbg !23
+  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %0, i32 0, i32 0, !dbg !24
+  store i32 (i32, i32)* %4, i32 (i32, i32)** %5, align 8, !dbg !25
+  ret void, !dbg !26
+
+	in : 
+	out :  
+Pointer is:
+is NULL
+Pointer is:
+0x20270b0%struct.fptr* %0
+
+Values are:
+
+overover
+
+Pointer is:
+0x20270d8%struct.fptr* %1
+
+Values are:
+
+overover
+
+Pointer is:
+0x20279a8  %3 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !23
+
+Values are:
+0x20270d8%struct.fptr* %1 
+overover
+
+Pointer is:
+0x2027a48  %4 = load i32 (i32, i32)*, i32 (i32, i32)** %3, align 8, !dbg !23
+
+Values are:
+
+overover
+
+Pointer is:
+0x2027b68  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %0, i32 0, i32 0, !dbg !24
+
+Values are:
+0x20270b0%struct.fptr* %0 
+overover
+
+deal with clever
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  %1 = alloca %struct.fptr, align 8
+  %2 = alloca %struct.fptr, align 8
+  call void @llvm.dbg.value(metadata i32 (i32, i32, i32 (i32, i32)*)* null, i64 0, metadata !11, metadata !21), !dbg !22
+  call void @llvm.dbg.declare(metadata %struct.fptr* %1, metadata !23, metadata !21), !dbg !24
+  %3 = bitcast %struct.fptr* %1 to i8*, !dbg !24
+  call void @llvm.memset.p0i8.i64(i8* %3, i8 0, i64 8, i32 8, i1 false), !dbg !24
+  call void @llvm.dbg.declare(metadata %struct.fptr* %2, metadata !25, metadata !21), !dbg !26
+  %4 = bitcast %struct.fptr* %2 to i8*, !dbg !26
+  call void @llvm.memset.p0i8.i64(i8* %4, i8 0, i64 8, i32 8, i1 false), !dbg !26
+  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !27
+  store i32 (i32, i32)* @minus, i32 (i32, i32)** %5, align 8, !dbg !28
+  %6 = getelementptr inbounds %struct.fptr, %struct.fptr* %2, i32 0, i32 0, !dbg !29
+  store i32 (i32, i32)* @plus, i32 (i32, i32)** %6, align 8, !dbg !30
+  call void @llvm.dbg.value(metadata i32 (i32, i32, i32 (i32, i32)*)* @foo, i64 0, metadata !11, metadata !21), !dbg !22
+  call void @make_simple_alias(%struct.fptr* %1, %struct.fptr* %2), !dbg !31
+  %7 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !32
+  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32
+  %9 = call i32 @foo(i32 1, i32 2, i32 (i32, i32)* %8), !dbg !32
+  call void @llvm.dbg.value(metadata i32 %9, i64 0, metadata !33, metadata !21), !dbg !35
+  ret i32 0, !dbg !36
+
+	in : 
+	out :  
+Pointer is:
+0x201b748
+; Function Attrs: noinline nounwind uwtable
+define i32 @minus(i32, i32) #0 !dbg !18 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !19, metadata !12), !dbg !20
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !21, metadata !12), !dbg !22
+  %3 = sub nsw i32 %0, %1, !dbg !23
+  ret i32 %3, !dbg !24
+}
+
+
+Values are:
+
+overover
+
+Pointer is:
+0x201c6e0i32 2
+
+Values are:
+
+overover
+
+Pointer is:
+0x201c9a0i32 1
+
+Values are:
+
+overover
+
+Pointer is:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+
+
+Values are:
+
+overover
+
+Pointer is:
+0x2026280i32 0
+
+Values are:
+
+overover
+
+Pointer is:
+0x20282a8  %1 = alloca %struct.fptr, align 8
+
+Values are:
+
+overover
+
+Pointer is:
+0x2028308  %2 = alloca %struct.fptr, align 8
+
+Values are:
+
+overover
+
+Pointer is:
+0x2029028  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !27
+
+Values are:
+
+overover
+
+Pointer is:
+0x20291a8  %6 = getelementptr inbounds %struct.fptr, %struct.fptr* %2, i32 0, i32 0, !dbg !29
+
+Values are:
+
+overover
+
+Pointer is:
+0x20293d8  call void @make_simple_alias(%struct.fptr* %1, %struct.fptr* %2), !dbg !31
+
+Values are:
+
+overover
+
+Pointer is:
+0x2029678  %7 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !32
+
+Values are:
+
+overover
+
+Pointer is:
+0x20296e8  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32
+
+Values are:
+
+overover
+
+Pointer is:
+0x2029790  %9 = call i32 @foo(i32 1, i32 2, i32 (i32, i32)* %8), !dbg !32
+
+Values are:
+
+overover
+
+deal with make_simple_alias
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  call void @llvm.dbg.value(metadata %struct.fptr* %0, i64 0, metadata !18, metadata !19), !dbg !20
+  call void @llvm.dbg.value(metadata %struct.fptr* %1, i64 0, metadata !21, metadata !19), !dbg !22
+  %3 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !23
+  %4 = load i32 (i32, i32)*, i32 (i32, i32)** %3, align 8, !dbg !23
+  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %0, i32 0, i32 0, !dbg !24
+  store i32 (i32, i32)* %4, i32 (i32, i32)** %5, align 8, !dbg !25
+  ret void, !dbg !26
+
+	in : 
+Pointer is:
+is NULL
+Pointer is:
+0x201b748
+; Function Attrs: noinline nounwind uwtable
+define i32 @minus(i32, i32) #0 !dbg !18 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !19, metadata !12), !dbg !20
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !21, metadata !12), !dbg !22
+  %3 = sub nsw i32 %0, %1, !dbg !23
+  ret i32 %3, !dbg !24
+}
+
+
+Values are:
+
+overover
+
+Pointer is:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+
+
+Values are:
+
+overover
+
+Pointer is:
+0x20270b0%struct.fptr* %0
+
+Values are:
+0x201b748
+; Function Attrs: noinline nounwind uwtable
+define i32 @minus(i32, i32) #0 !dbg !18 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !19, metadata !12), !dbg !20
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !21, metadata !12), !dbg !22
+  %3 = sub nsw i32 %0, %1, !dbg !23
+  ret i32 %3, !dbg !24
+}
+ 0x20282a8  %1 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x20270d8%struct.fptr* %1
+
+Values are:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+ 0x2028308  %2 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x20282a8  %1 = alloca %struct.fptr, align 8
+
+Values are:
+0x201b748
+; Function Attrs: noinline nounwind uwtable
+define i32 @minus(i32, i32) #0 !dbg !18 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !19, metadata !12), !dbg !20
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !21, metadata !12), !dbg !22
+  %3 = sub nsw i32 %0, %1, !dbg !23
+  ret i32 %3, !dbg !24
+}
+ 
+overover
+
+Pointer is:
+0x2028308  %2 = alloca %struct.fptr, align 8
+
+Values are:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+ 
+overover
+
+Pointer is:
+0x2029028  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !27
+
+Values are:
+0x20282a8  %1 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x20291a8  %6 = getelementptr inbounds %struct.fptr, %struct.fptr* %2, i32 0, i32 0, !dbg !29
+
+Values are:
+0x2028308  %2 = alloca %struct.fptr, align 8 
+overover
+
+	out :  
+Pointer is:
+is NULL
+Pointer is:
+0x201b748
+; Function Attrs: noinline nounwind uwtable
+define i32 @minus(i32, i32) #0 !dbg !18 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !19, metadata !12), !dbg !20
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !21, metadata !12), !dbg !22
+  %3 = sub nsw i32 %0, %1, !dbg !23
+  ret i32 %3, !dbg !24
+}
+
+
+Values are:
+
+overover
+
+Pointer is:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+
+
+Values are:
+
+overover
+
+Pointer is:
+0x20270b0%struct.fptr* %0
+
+Values are:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+ 0x2028308  %2 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x20270d8%struct.fptr* %1
+
+Values are:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+ 0x2028308  %2 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x20279a8  %3 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !23
+
+Values are:
+0x20270d8%struct.fptr* %1 
+overover
+
+Pointer is:
+0x2027a48  %4 = load i32 (i32, i32)*, i32 (i32, i32)** %3, align 8, !dbg !23
+
+Values are:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+ 0x2028308  %2 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x2027b68  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %0, i32 0, i32 0, !dbg !24
+
+Values are:
+0x20270b0%struct.fptr* %0 
+overover
+
+Pointer is:
+0x20282a8  %1 = alloca %struct.fptr, align 8
+
+Values are:
+0x201b748
+; Function Attrs: noinline nounwind uwtable
+define i32 @minus(i32, i32) #0 !dbg !18 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !19, metadata !12), !dbg !20
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !21, metadata !12), !dbg !22
+  %3 = sub nsw i32 %0, %1, !dbg !23
+  ret i32 %3, !dbg !24
+}
+ 
+overover
+
+Pointer is:
+0x2028308  %2 = alloca %struct.fptr, align 8
+
+Values are:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+ 
+overover
+
+Pointer is:
+0x2029028  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !27
+
+Values are:
+0x20282a8  %1 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x20291a8  %6 = getelementptr inbounds %struct.fptr, %struct.fptr* %2, i32 0, i32 0, !dbg !29
+
+Values are:
+0x2028308  %2 = alloca %struct.fptr, align 8 
+overover
+
+deal with foo
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  %4 = alloca %struct.fptr, align 8
+  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %4, i32 0, i32 0
+  store i32 (i32, i32)* %2, i32 (i32, i32)** %5, align 8
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !17, metadata !18), !dbg !19
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !20, metadata !18), !dbg !21
+  call void @llvm.dbg.declare(metadata %struct.fptr* %4, metadata !22, metadata !18), !dbg !23
+  %6 = getelementptr inbounds %struct.fptr, %struct.fptr* %4, i32 0, i32 0, !dbg !24
+  %7 = load i32 (i32, i32)*, i32 (i32, i32)** %6, align 8, !dbg !24
+  %8 = call i32 %7(i32 %0, i32 %1), !dbg !25
+  ret i32 %8, !dbg !26
+
+	in : 
+Pointer is:
+0x201b748
+; Function Attrs: noinline nounwind uwtable
+define i32 @minus(i32, i32) #0 !dbg !18 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !19, metadata !12), !dbg !20
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !21, metadata !12), !dbg !22
+  %3 = sub nsw i32 %0, %1, !dbg !23
+  ret i32 %3, !dbg !24
+}
+
+
+Values are:
+
+overover
+
+Pointer is:
+0x201c6e0i32 2
+
+Values are:
+
+overover
+
+Pointer is:
+0x201c9a0i32 1
+
+Values are:
+
+overover
+
+Pointer is:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+
+
+Values are:
+
+overover
+
+Pointer is:
+0x20261b0i32 %0
+
+Values are:
+
+overover
+
+Pointer is:
+0x20261d8i32 %1
+
+Values are:
+
+overover
+
+Pointer is:
+0x2026200i32 (i32, i32)* %2
+
+Values are:
+0x20296e8  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32 
+overover
+
+Pointer is:
+0x2026f98  %8 = call i32 %7(i32 %0, i32 %1), !dbg !25
+
+Values are:
+
+overover
+
+Pointer is:
+0x20282a8  %1 = alloca %struct.fptr, align 8
+
+Values are:
+
+overover
+
+Pointer is:
+0x2028308  %2 = alloca %struct.fptr, align 8
+
+Values are:
+
+overover
+
+Pointer is:
+0x2029028  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !27
+
+Values are:
+
+overover
+
+Pointer is:
+0x20291a8  %6 = getelementptr inbounds %struct.fptr, %struct.fptr* %2, i32 0, i32 0, !dbg !29
+
+Values are:
+
+overover
+
+Pointer is:
+0x20293d8  call void @make_simple_alias(%struct.fptr* %1, %struct.fptr* %2), !dbg !31
+
+Values are:
+
+overover
+
+Pointer is:
+0x2029678  %7 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !32
+
+Values are:
+0x20282a8  %1 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x20296e8  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32
+
+Values are:
+
+overover
+
+	out :  
+Pointer is:
+0x201b748
+; Function Attrs: noinline nounwind uwtable
+define i32 @minus(i32, i32) #0 !dbg !18 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !19, metadata !12), !dbg !20
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !21, metadata !12), !dbg !22
+  %3 = sub nsw i32 %0, %1, !dbg !23
+  ret i32 %3, !dbg !24
+}
+
+
+Values are:
+
+overover
+
+Pointer is:
+0x201c6e0i32 2
+
+Values are:
+
+overover
+
+Pointer is:
+0x201c9a0i32 1
+
+Values are:
+
+overover
+
+Pointer is:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+
+
+Values are:
+
+overover
+
+Pointer is:
+0x20261b0i32 %0
+
+Values are:
+
+overover
+
+Pointer is:
+0x20261d8i32 %1
+
+Values are:
+
+overover
+
+Pointer is:
+0x2026200i32 (i32, i32)* %2
+
+Values are:
+0x20296e8  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32 
+overover
+
+Pointer is:
+0x20262c8  %4 = alloca %struct.fptr, align 8
+
+Values are:
+0x20296e8  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32 
+overover
+
+Pointer is:
+0x2026418  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %4, i32 0, i32 0
+
+Values are:
+0x20262c8  %4 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x2026d48  %6 = getelementptr inbounds %struct.fptr, %struct.fptr* %4, i32 0, i32 0, !dbg !24
+
+Values are:
+0x20262c8  %4 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x2026de8  %7 = load i32 (i32, i32)*, i32 (i32, i32)** %6, align 8, !dbg !24
+
+Values are:
+0x20296e8  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32 
+overover
+
+Pointer is:
+0x2026f98  %8 = call i32 %7(i32 %0, i32 %1), !dbg !25
+
+Values are:
+
+overover
+
+Pointer is:
+0x20282a8  %1 = alloca %struct.fptr, align 8
+
+Values are:
+
+overover
+
+Pointer is:
+0x2028308  %2 = alloca %struct.fptr, align 8
+
+Values are:
+
+overover
+
+Pointer is:
+0x2029028  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !27
+
+Values are:
+
+overover
+
+Pointer is:
+0x20291a8  %6 = getelementptr inbounds %struct.fptr, %struct.fptr* %2, i32 0, i32 0, !dbg !29
+
+Values are:
+
+overover
+
+Pointer is:
+0x20293d8  call void @make_simple_alias(%struct.fptr* %1, %struct.fptr* %2), !dbg !31
+
+Values are:
+
+overover
+
+Pointer is:
+0x2029678  %7 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !32
+
+Values are:
+0x20282a8  %1 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x20296e8  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32
+
+Values are:
+
+overover
+
+deal with clever
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  %1 = alloca %struct.fptr, align 8
+  %2 = alloca %struct.fptr, align 8
+  call void @llvm.dbg.value(metadata i32 (i32, i32, i32 (i32, i32)*)* null, i64 0, metadata !11, metadata !21), !dbg !22
+  call void @llvm.dbg.declare(metadata %struct.fptr* %1, metadata !23, metadata !21), !dbg !24
+  %3 = bitcast %struct.fptr* %1 to i8*, !dbg !24
+  call void @llvm.memset.p0i8.i64(i8* %3, i8 0, i64 8, i32 8, i1 false), !dbg !24
+  call void @llvm.dbg.declare(metadata %struct.fptr* %2, metadata !25, metadata !21), !dbg !26
+  %4 = bitcast %struct.fptr* %2 to i8*, !dbg !26
+  call void @llvm.memset.p0i8.i64(i8* %4, i8 0, i64 8, i32 8, i1 false), !dbg !26
+  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !27
+  store i32 (i32, i32)* @minus, i32 (i32, i32)** %5, align 8, !dbg !28
+  %6 = getelementptr inbounds %struct.fptr, %struct.fptr* %2, i32 0, i32 0, !dbg !29
+  store i32 (i32, i32)* @plus, i32 (i32, i32)** %6, align 8, !dbg !30
+  call void @llvm.dbg.value(metadata i32 (i32, i32, i32 (i32, i32)*)* @foo, i64 0, metadata !11, metadata !21), !dbg !22
+  call void @make_simple_alias(%struct.fptr* %1, %struct.fptr* %2), !dbg !31
+  %7 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !32
+  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32
+  %9 = call i32 @foo(i32 1, i32 2, i32 (i32, i32)* %8), !dbg !32
+  call void @llvm.dbg.value(metadata i32 %9, i64 0, metadata !33, metadata !21), !dbg !35
+  ret i32 0, !dbg !36
+
+	in : 
+Pointer is:
+is NULL
+Pointer is:
+0x201b748
+; Function Attrs: noinline nounwind uwtable
+define i32 @minus(i32, i32) #0 !dbg !18 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !19, metadata !12), !dbg !20
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !21, metadata !12), !dbg !22
+  %3 = sub nsw i32 %0, %1, !dbg !23
+  ret i32 %3, !dbg !24
+}
+
+
+Values are:
+
+overover
+
+Pointer is:
+0x201c6e0i32 2
+
+Values are:
+
+overover
+
+Pointer is:
+0x201c9a0i32 1
+
+Values are:
+
+overover
+
+Pointer is:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+
+
+Values are:
+
+overover
+
+Pointer is:
+0x20261b0i32 %0
+
+Values are:
+
+overover
+
+Pointer is:
+0x20261d8i32 %1
+
+Values are:
+
+overover
+
+Pointer is:
+0x2026200i32 (i32, i32)* %2
+
+Values are:
+0x20296e8  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32 
+overover
+
+Pointer is:
+0x20262c8  %4 = alloca %struct.fptr, align 8
+
+Values are:
+0x20296e8  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32 
+overover
+
+Pointer is:
+0x2026418  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %4, i32 0, i32 0
+
+Values are:
+0x20262c8  %4 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x2026d48  %6 = getelementptr inbounds %struct.fptr, %struct.fptr* %4, i32 0, i32 0, !dbg !24
+
+Values are:
+0x20262c8  %4 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x2026de8  %7 = load i32 (i32, i32)*, i32 (i32, i32)** %6, align 8, !dbg !24
+
+Values are:
+0x20296e8  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32 
+overover
+
+Pointer is:
+0x2026f98  %8 = call i32 %7(i32 %0, i32 %1), !dbg !25
+
+Values are:
+
+overover
+
+Pointer is:
+0x20270b0%struct.fptr* %0
+
+Values are:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+ 0x2028308  %2 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x20270d8%struct.fptr* %1
+
+Values are:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+ 0x2028308  %2 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x20279a8  %3 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !23
+
+Values are:
+0x20270d8%struct.fptr* %1 
+overover
+
+Pointer is:
+0x2027a48  %4 = load i32 (i32, i32)*, i32 (i32, i32)** %3, align 8, !dbg !23
+
+Values are:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+ 0x2028308  %2 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x2027b68  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %0, i32 0, i32 0, !dbg !24
+
+Values are:
+0x20270b0%struct.fptr* %0 
+overover
+
+Pointer is:
+0x20282a8  %1 = alloca %struct.fptr, align 8
+
+Values are:
+0x201b748
+; Function Attrs: noinline nounwind uwtable
+define i32 @minus(i32, i32) #0 !dbg !18 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !19, metadata !12), !dbg !20
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !21, metadata !12), !dbg !22
+  %3 = sub nsw i32 %0, %1, !dbg !23
+  ret i32 %3, !dbg !24
+}
+ 
+overover
+
+Pointer is:
+0x2028308  %2 = alloca %struct.fptr, align 8
+
+Values are:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+ 
+overover
+
+Pointer is:
+0x2029028  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !27
+
+Values are:
+0x20282a8  %1 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x20291a8  %6 = getelementptr inbounds %struct.fptr, %struct.fptr* %2, i32 0, i32 0, !dbg !29
+
+Values are:
+0x2028308  %2 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x20293d8  call void @make_simple_alias(%struct.fptr* %1, %struct.fptr* %2), !dbg !31
+
+Values are:
+
+overover
+
+Pointer is:
+0x2029678  %7 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !32
+
+Values are:
+0x20282a8  %1 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x20296e8  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32
+
+Values are:
+
+overover
+
+	out :  
+Pointer is:
+is NULL
+Pointer is:
+0x201b748
+; Function Attrs: noinline nounwind uwtable
+define i32 @minus(i32, i32) #0 !dbg !18 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !19, metadata !12), !dbg !20
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !21, metadata !12), !dbg !22
+  %3 = sub nsw i32 %0, %1, !dbg !23
+  ret i32 %3, !dbg !24
+}
+
+
+Values are:
+
+overover
+
+Pointer is:
+0x201c6e0i32 2
+
+Values are:
+
+overover
+
+Pointer is:
+0x201c9a0i32 1
+
+Values are:
+
+overover
+
+Pointer is:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+
+
+Values are:
+
+overover
+
+Pointer is:
+0x20261b0i32 %0
+
+Values are:
+
+overover
+
+Pointer is:
+0x20261d8i32 %1
+
+Values are:
+
+overover
+
+Pointer is:
+0x2026200i32 (i32, i32)* %2
+
+Values are:
+
+overover
+
+Pointer is:
+0x2026280i32 0
+
+Values are:
+
+overover
+
+Pointer is:
+0x20262c8  %4 = alloca %struct.fptr, align 8
+
+Values are:
+0x20296e8  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32 
+overover
+
+Pointer is:
+0x2026418  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %4, i32 0, i32 0
+
+Values are:
+0x20262c8  %4 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x2026d48  %6 = getelementptr inbounds %struct.fptr, %struct.fptr* %4, i32 0, i32 0, !dbg !24
+
+Values are:
+0x20262c8  %4 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x2026de8  %7 = load i32 (i32, i32)*, i32 (i32, i32)** %6, align 8, !dbg !24
+
+Values are:
+0x20296e8  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32 
+overover
+
+Pointer is:
+0x2026f98  %8 = call i32 %7(i32 %0, i32 %1), !dbg !25
+
+Values are:
+
+overover
+
+Pointer is:
+0x20270b0%struct.fptr* %0
+
+Values are:
+
+overover
+
+Pointer is:
+0x20270d8%struct.fptr* %1
+
+Values are:
+
+overover
+
+Pointer is:
+0x20279a8  %3 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !23
+
+Values are:
+
+overover
+
+Pointer is:
+0x2027a48  %4 = load i32 (i32, i32)*, i32 (i32, i32)** %3, align 8, !dbg !23
+
+Values are:
+
+overover
+
+Pointer is:
+0x2027b68  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %0, i32 0, i32 0, !dbg !24
+
+Values are:
+
+overover
+
+Pointer is:
+0x20282a8  %1 = alloca %struct.fptr, align 8
+
+Values are:
+
+overover
+
+Pointer is:
+0x2028308  %2 = alloca %struct.fptr, align 8
+
+Values are:
+
+overover
+
+Pointer is:
+0x2029028  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !27
+
+Values are:
+
+overover
+
+Pointer is:
+0x20291a8  %6 = getelementptr inbounds %struct.fptr, %struct.fptr* %2, i32 0, i32 0, !dbg !29
+
+Values are:
+
+overover
+
+Pointer is:
+0x20293d8  call void @make_simple_alias(%struct.fptr* %1, %struct.fptr* %2), !dbg !31
+
+Values are:
+
+overover
+
+Pointer is:
+0x2029678  %7 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !32
+
+Values are:
+0x20282a8  %1 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x20296e8  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32
+
+Values are:
+0x20296e8  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32 
+overover
+
+Pointer is:
+0x2029790  %9 = call i32 @foo(i32 1, i32 2, i32 (i32, i32)* %8), !dbg !32
+
+Values are:
+
+overover
+
+deal with make_simple_alias
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  call void @llvm.dbg.value(metadata %struct.fptr* %0, i64 0, metadata !18, metadata !19), !dbg !20
+  call void @llvm.dbg.value(metadata %struct.fptr* %1, i64 0, metadata !21, metadata !19), !dbg !22
+  %3 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !23
+  %4 = load i32 (i32, i32)*, i32 (i32, i32)** %3, align 8, !dbg !23
+  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %0, i32 0, i32 0, !dbg !24
+  store i32 (i32, i32)* %4, i32 (i32, i32)** %5, align 8, !dbg !25
+  ret void, !dbg !26
+
+	in : 
+Pointer is:
+is NULL
+Pointer is:
+0x201b748
+; Function Attrs: noinline nounwind uwtable
+define i32 @minus(i32, i32) #0 !dbg !18 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !19, metadata !12), !dbg !20
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !21, metadata !12), !dbg !22
+  %3 = sub nsw i32 %0, %1, !dbg !23
+  ret i32 %3, !dbg !24
+}
+
+
+Values are:
+
+overover
+
+Pointer is:
+0x201c6e0i32 2
+
+Values are:
+
+overover
+
+Pointer is:
+0x201c9a0i32 1
+
+Values are:
+
+overover
+
+Pointer is:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+
+
+Values are:
+
+overover
+
+Pointer is:
+0x20261b0i32 %0
+
+Values are:
+
+overover
+
+Pointer is:
+0x20261d8i32 %1
+
+Values are:
+
+overover
+
+Pointer is:
+0x2026200i32 (i32, i32)* %2
+
+Values are:
+0x20296e8  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32 
+overover
+
+Pointer is:
+0x20262c8  %4 = alloca %struct.fptr, align 8
+
+Values are:
+0x20296e8  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32 
+overover
+
+Pointer is:
+0x2026418  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %4, i32 0, i32 0
+
+Values are:
+0x20262c8  %4 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x2026d48  %6 = getelementptr inbounds %struct.fptr, %struct.fptr* %4, i32 0, i32 0, !dbg !24
+
+Values are:
+0x20262c8  %4 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x2026de8  %7 = load i32 (i32, i32)*, i32 (i32, i32)** %6, align 8, !dbg !24
+
+Values are:
+0x20296e8  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32 
+overover
+
+Pointer is:
+0x2026f98  %8 = call i32 %7(i32 %0, i32 %1), !dbg !25
+
+Values are:
+
+overover
+
+Pointer is:
+0x20270b0%struct.fptr* %0
+
+Values are:
+0x201b748
+; Function Attrs: noinline nounwind uwtable
+define i32 @minus(i32, i32) #0 !dbg !18 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !19, metadata !12), !dbg !20
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !21, metadata !12), !dbg !22
+  %3 = sub nsw i32 %0, %1, !dbg !23
+  ret i32 %3, !dbg !24
+}
+ 0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+ 0x20282a8  %1 = alloca %struct.fptr, align 8 0x2028308  %2 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x20270d8%struct.fptr* %1
+
+Values are:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+ 0x2028308  %2 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x20279a8  %3 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !23
+
+Values are:
+0x20270d8%struct.fptr* %1 
+overover
+
+Pointer is:
+0x2027a48  %4 = load i32 (i32, i32)*, i32 (i32, i32)** %3, align 8, !dbg !23
+
+Values are:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+ 0x2028308  %2 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x2027b68  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %0, i32 0, i32 0, !dbg !24
+
+Values are:
+0x20270b0%struct.fptr* %0 
+overover
+
+Pointer is:
+0x20282a8  %1 = alloca %struct.fptr, align 8
+
+Values are:
+0x201b748
+; Function Attrs: noinline nounwind uwtable
+define i32 @minus(i32, i32) #0 !dbg !18 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !19, metadata !12), !dbg !20
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !21, metadata !12), !dbg !22
+  %3 = sub nsw i32 %0, %1, !dbg !23
+  ret i32 %3, !dbg !24
+}
+ 
+overover
+
+Pointer is:
+0x2028308  %2 = alloca %struct.fptr, align 8
+
+Values are:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+ 
+overover
+
+Pointer is:
+0x2029028  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !27
+
+Values are:
+0x20282a8  %1 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x20291a8  %6 = getelementptr inbounds %struct.fptr, %struct.fptr* %2, i32 0, i32 0, !dbg !29
+
+Values are:
+0x2028308  %2 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x20293d8  call void @make_simple_alias(%struct.fptr* %1, %struct.fptr* %2), !dbg !31
+
+Values are:
+
+overover
+
+Pointer is:
+0x2029678  %7 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !32
+
+Values are:
+0x20282a8  %1 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x20296e8  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32
+
+Values are:
+
+overover
+
+	out :  
+Pointer is:
+is NULL
+Pointer is:
+0x201b748
+; Function Attrs: noinline nounwind uwtable
+define i32 @minus(i32, i32) #0 !dbg !18 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !19, metadata !12), !dbg !20
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !21, metadata !12), !dbg !22
+  %3 = sub nsw i32 %0, %1, !dbg !23
+  ret i32 %3, !dbg !24
+}
+
+
+Values are:
+
+overover
+
+Pointer is:
+0x201c6e0i32 2
+
+Values are:
+
+overover
+
+Pointer is:
+0x201c9a0i32 1
+
+Values are:
+
+overover
+
+Pointer is:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+
+
+Values are:
+
+overover
+
+Pointer is:
+0x20261b0i32 %0
+
+Values are:
+
+overover
+
+Pointer is:
+0x20261d8i32 %1
+
+Values are:
+
+overover
+
+Pointer is:
+0x2026200i32 (i32, i32)* %2
+
+Values are:
+0x20296e8  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32 
+overover
+
+Pointer is:
+0x20262c8  %4 = alloca %struct.fptr, align 8
+
+Values are:
+0x20296e8  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32 
+overover
+
+Pointer is:
+0x2026418  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %4, i32 0, i32 0
+
+Values are:
+0x20262c8  %4 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x2026d48  %6 = getelementptr inbounds %struct.fptr, %struct.fptr* %4, i32 0, i32 0, !dbg !24
+
+Values are:
+0x20262c8  %4 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x2026de8  %7 = load i32 (i32, i32)*, i32 (i32, i32)** %6, align 8, !dbg !24
+
+Values are:
+0x20296e8  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32 
+overover
+
+Pointer is:
+0x2026f98  %8 = call i32 %7(i32 %0, i32 %1), !dbg !25
+
+Values are:
+
+overover
+
+Pointer is:
+0x20270b0%struct.fptr* %0
+
+Values are:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+ 0x2028308  %2 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x20270d8%struct.fptr* %1
+
+Values are:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+ 0x2028308  %2 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x20279a8  %3 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !23
+
+Values are:
+0x20270d8%struct.fptr* %1 
+overover
+
+Pointer is:
+0x2027a48  %4 = load i32 (i32, i32)*, i32 (i32, i32)** %3, align 8, !dbg !23
+
+Values are:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+ 0x2028308  %2 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x2027b68  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %0, i32 0, i32 0, !dbg !24
+
+Values are:
+0x20270b0%struct.fptr* %0 
+overover
+
+Pointer is:
+0x20282a8  %1 = alloca %struct.fptr, align 8
+
+Values are:
+0x201b748
+; Function Attrs: noinline nounwind uwtable
+define i32 @minus(i32, i32) #0 !dbg !18 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !19, metadata !12), !dbg !20
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !21, metadata !12), !dbg !22
+  %3 = sub nsw i32 %0, %1, !dbg !23
+  ret i32 %3, !dbg !24
+}
+ 
+overover
+
+Pointer is:
+0x2028308  %2 = alloca %struct.fptr, align 8
+
+Values are:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+ 
+overover
+
+Pointer is:
+0x2029028  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !27
+
+Values are:
+0x20282a8  %1 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x20291a8  %6 = getelementptr inbounds %struct.fptr, %struct.fptr* %2, i32 0, i32 0, !dbg !29
+
+Values are:
+0x2028308  %2 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x20293d8  call void @make_simple_alias(%struct.fptr* %1, %struct.fptr* %2), !dbg !31
+
+Values are:
+
+overover
+
+Pointer is:
+0x2029678  %7 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !32
+
+Values are:
+0x20282a8  %1 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x20296e8  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32
+
+Values are:
+
+overover
+
+deal with llvm.memset.p0i8.i64
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+deal with foo
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  %4 = alloca %struct.fptr, align 8
+  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %4, i32 0, i32 0
+  store i32 (i32, i32)* %2, i32 (i32, i32)** %5, align 8
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !17, metadata !18), !dbg !19
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !20, metadata !18), !dbg !21
+  call void @llvm.dbg.declare(metadata %struct.fptr* %4, metadata !22, metadata !18), !dbg !23
+  %6 = getelementptr inbounds %struct.fptr, %struct.fptr* %4, i32 0, i32 0, !dbg !24
+  %7 = load i32 (i32, i32)*, i32 (i32, i32)** %6, align 8, !dbg !24
+  %8 = call i32 %7(i32 %0, i32 %1), !dbg !25
+  ret i32 %8, !dbg !26
+
+	in : 
+Pointer is:
+is NULL
+Pointer is:
+0x201b748
+; Function Attrs: noinline nounwind uwtable
+define i32 @minus(i32, i32) #0 !dbg !18 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !19, metadata !12), !dbg !20
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !21, metadata !12), !dbg !22
+  %3 = sub nsw i32 %0, %1, !dbg !23
+  ret i32 %3, !dbg !24
+}
+
+
+Values are:
+
+overover
+
+Pointer is:
+0x201c6e0i32 2
+
+Values are:
+
+overover
+
+Pointer is:
+0x201c9a0i32 1
+
+Values are:
+
+overover
+
+Pointer is:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+
+
+Values are:
+
+overover
+
+Pointer is:
+0x20261b0i32 %0
+
+Values are:
+
+overover
+
+Pointer is:
+0x20261d8i32 %1
+
+Values are:
+
+overover
+
+Pointer is:
+0x2026200i32 (i32, i32)* %2
+
+Values are:
+0x201b748
+; Function Attrs: noinline nounwind uwtable
+define i32 @minus(i32, i32) #0 !dbg !18 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !19, metadata !12), !dbg !20
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !21, metadata !12), !dbg !22
+  %3 = sub nsw i32 %0, %1, !dbg !23
+  ret i32 %3, !dbg !24
+}
+ 0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+ 0x2028308  %2 = alloca %struct.fptr, align 8 0x20296e8  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32 
+overover
+
+Pointer is:
+0x20262c8  %4 = alloca %struct.fptr, align 8
+
+Values are:
+
+overover
+
+Pointer is:
+0x2026418  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %4, i32 0, i32 0
+
+Values are:
+
+overover
+
+Pointer is:
+0x2026d48  %6 = getelementptr inbounds %struct.fptr, %struct.fptr* %4, i32 0, i32 0, !dbg !24
+
+Values are:
+
+overover
+
+Pointer is:
+0x2026de8  %7 = load i32 (i32, i32)*, i32 (i32, i32)** %6, align 8, !dbg !24
+
+Values are:
+
+overover
+
+Pointer is:
+0x2026f98  %8 = call i32 %7(i32 %0, i32 %1), !dbg !25
+
+Values are:
+
+overover
+
+Pointer is:
+0x20270b0%struct.fptr* %0
+
+Values are:
+
+overover
+
+Pointer is:
+0x20270d8%struct.fptr* %1
+
+Values are:
+
+overover
+
+Pointer is:
+0x20279a8  %3 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !23
+
+Values are:
+0x20270d8%struct.fptr* %1 
+overover
+
+Pointer is:
+0x2027a48  %4 = load i32 (i32, i32)*, i32 (i32, i32)** %3, align 8, !dbg !23
+
+Values are:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+ 0x2028308  %2 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x2027b68  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %0, i32 0, i32 0, !dbg !24
+
+Values are:
+0x20270b0%struct.fptr* %0 
+overover
+
+Pointer is:
+0x20282a8  %1 = alloca %struct.fptr, align 8
+
+Values are:
+0x201b748
+; Function Attrs: noinline nounwind uwtable
+define i32 @minus(i32, i32) #0 !dbg !18 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !19, metadata !12), !dbg !20
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !21, metadata !12), !dbg !22
+  %3 = sub nsw i32 %0, %1, !dbg !23
+  ret i32 %3, !dbg !24
+}
+ 0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+ 0x2028308  %2 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x2028308  %2 = alloca %struct.fptr, align 8
+
+Values are:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+ 0x2028308  %2 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x2029028  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !27
+
+Values are:
+0x20282a8  %1 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x20291a8  %6 = getelementptr inbounds %struct.fptr, %struct.fptr* %2, i32 0, i32 0, !dbg !29
+
+Values are:
+0x2028308  %2 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x20293d8  call void @make_simple_alias(%struct.fptr* %1, %struct.fptr* %2), !dbg !31
+
+Values are:
+
+overover
+
+Pointer is:
+0x2029678  %7 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !32
+
+Values are:
+0x20282a8  %1 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x20296e8  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32
+
+Values are:
+0x201b748
+; Function Attrs: noinline nounwind uwtable
+define i32 @minus(i32, i32) #0 !dbg !18 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !19, metadata !12), !dbg !20
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !21, metadata !12), !dbg !22
+  %3 = sub nsw i32 %0, %1, !dbg !23
+  ret i32 %3, !dbg !24
+}
+ 0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+ 0x2028308  %2 = alloca %struct.fptr, align 8 
+overover
+
+	out :  
+Pointer is:
+is NULL
+Pointer is:
+0x201b748
+; Function Attrs: noinline nounwind uwtable
+define i32 @minus(i32, i32) #0 !dbg !18 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !19, metadata !12), !dbg !20
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !21, metadata !12), !dbg !22
+  %3 = sub nsw i32 %0, %1, !dbg !23
+  ret i32 %3, !dbg !24
+}
+
+
+Values are:
+
+overover
+
+Pointer is:
+0x201c6e0i32 2
+
+Values are:
+
+overover
+
+Pointer is:
+0x201c9a0i32 1
+
+Values are:
+
+overover
+
+Pointer is:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+
+
+Values are:
+
+overover
+
+Pointer is:
+0x20261b0i32 %0
+
+Values are:
+
+overover
+
+Pointer is:
+0x20261d8i32 %1
+
+Values are:
+
+overover
+
+Pointer is:
+0x2026200i32 (i32, i32)* %2
+
+Values are:
+0x201b748
+; Function Attrs: noinline nounwind uwtable
+define i32 @minus(i32, i32) #0 !dbg !18 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !19, metadata !12), !dbg !20
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !21, metadata !12), !dbg !22
+  %3 = sub nsw i32 %0, %1, !dbg !23
+  ret i32 %3, !dbg !24
+}
+ 0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+ 0x2028308  %2 = alloca %struct.fptr, align 8 0x20296e8  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32 
+overover
+
+Pointer is:
+0x20262c8  %4 = alloca %struct.fptr, align 8
+
+Values are:
+0x201b748
+; Function Attrs: noinline nounwind uwtable
+define i32 @minus(i32, i32) #0 !dbg !18 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !19, metadata !12), !dbg !20
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !21, metadata !12), !dbg !22
+  %3 = sub nsw i32 %0, %1, !dbg !23
+  ret i32 %3, !dbg !24
+}
+ 0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+ 0x2028308  %2 = alloca %struct.fptr, align 8 0x20296e8  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32 
+overover
+
+Pointer is:
+0x2026418  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %4, i32 0, i32 0
+
+Values are:
+0x20262c8  %4 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x2026d48  %6 = getelementptr inbounds %struct.fptr, %struct.fptr* %4, i32 0, i32 0, !dbg !24
+
+Values are:
+0x20262c8  %4 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x2026de8  %7 = load i32 (i32, i32)*, i32 (i32, i32)** %6, align 8, !dbg !24
+
+Values are:
+0x201b748
+; Function Attrs: noinline nounwind uwtable
+define i32 @minus(i32, i32) #0 !dbg !18 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !19, metadata !12), !dbg !20
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !21, metadata !12), !dbg !22
+  %3 = sub nsw i32 %0, %1, !dbg !23
+  ret i32 %3, !dbg !24
+}
+ 0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+ 0x2028308  %2 = alloca %struct.fptr, align 8 0x20296e8  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32 
+overover
+
+Pointer is:
+0x2026f98  %8 = call i32 %7(i32 %0, i32 %1), !dbg !25
+
+Values are:
+
+overover
+
+Pointer is:
+0x20270b0%struct.fptr* %0
+
+Values are:
+
+overover
+
+Pointer is:
+0x20270d8%struct.fptr* %1
+
+Values are:
+
+overover
+
+Pointer is:
+0x20279a8  %3 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !23
+
+Values are:
+0x20270d8%struct.fptr* %1 
+overover
+
+Pointer is:
+0x2027a48  %4 = load i32 (i32, i32)*, i32 (i32, i32)** %3, align 8, !dbg !23
+
+Values are:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+ 0x2028308  %2 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x2027b68  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %0, i32 0, i32 0, !dbg !24
+
+Values are:
+0x20270b0%struct.fptr* %0 
+overover
+
+Pointer is:
+0x20282a8  %1 = alloca %struct.fptr, align 8
+
+Values are:
+0x201b748
+; Function Attrs: noinline nounwind uwtable
+define i32 @minus(i32, i32) #0 !dbg !18 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !19, metadata !12), !dbg !20
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !21, metadata !12), !dbg !22
+  %3 = sub nsw i32 %0, %1, !dbg !23
+  ret i32 %3, !dbg !24
+}
+ 0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+ 0x2028308  %2 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x2028308  %2 = alloca %struct.fptr, align 8
+
+Values are:
+0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+ 0x2028308  %2 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x2029028  %5 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !27
+
+Values are:
+0x20282a8  %1 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x20291a8  %6 = getelementptr inbounds %struct.fptr, %struct.fptr* %2, i32 0, i32 0, !dbg !29
+
+Values are:
+0x2028308  %2 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x20293d8  call void @make_simple_alias(%struct.fptr* %1, %struct.fptr* %2), !dbg !31
+
+Values are:
+
+overover
+
+Pointer is:
+0x2029678  %7 = getelementptr inbounds %struct.fptr, %struct.fptr* %1, i32 0, i32 0, !dbg !32
+
+Values are:
+0x20282a8  %1 = alloca %struct.fptr, align 8 
+overover
+
+Pointer is:
+0x20296e8  %8 = load i32 (i32, i32)*, i32 (i32, i32)** %7, align 8, !dbg !32
+
+Values are:
+0x201b748
+; Function Attrs: noinline nounwind uwtable
+define i32 @minus(i32, i32) #0 !dbg !18 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !19, metadata !12), !dbg !20
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !21, metadata !12), !dbg !22
+  %3 = sub nsw i32 %0, %1, !dbg !23
+  ret i32 %3, !dbg !24
+}
+ 0x201d398
+; Function Attrs: noinline nounwind uwtable
+define i32 @plus(i32, i32) #0 !dbg !7 {
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+}
+ 0x2028308  %2 = alloca %struct.fptr, align 8 
+overover
+
+deal with minus
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = sub nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+
+	in : 
+Pointer is:
+0x20201a0i32 %0
+
+Values are:
+
+overover
+
+Pointer is:
+0x20201c8i32 %1
+
+Values are:
+
+overover
+
+Pointer is:
+0x20260b0  %3 = sub nsw i32 %0, %1, !dbg !16
+
+Values are:
+
+overover
+
+	out :  
+Pointer is:
+0x20201a0i32 %0
+
+Values are:
+
+overover
+
+Pointer is:
+0x20201c8i32 %1
+
+Values are:
+
+overover
+
+Pointer is:
+0x20260b0  %3 = sub nsw i32 %0, %1, !dbg !16
+
+Values are:
+
+overover
+
+deal with plus
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  call void @llvm.dbg.value(metadata i32 %0, i64 0, metadata !11, metadata !12), !dbg !13
+  call void @llvm.dbg.value(metadata i32 %1, i64 0, metadata !14, metadata !12), !dbg !15
+  %3 = add nsw i32 %0, %1, !dbg !16
+  ret i32 %3, !dbg !17
+
+	in : 
+Pointer is:
+0x201f190i32 %0
+
+Values are:
+
+overover
+
+Pointer is:
+0x201f1b8i32 %1
+
+Values are:
+
+overover
+
+Pointer is:
+0x20200a0  %3 = add nsw i32 %0, %1, !dbg !16
+
+Values are:
+
+overover
+
+	out :  
+Pointer is:
+0x201f190i32 %0
+
+Values are:
+
+overover
+
+Pointer is:
+0x201f1b8i32 %1
+
+Values are:
+
+overover
+
+Pointer is:
+0x20200a0  %3 = add nsw i32 %0, %1, !dbg !16
+
+Values are:
+
+overover
+
+17 : minus, plus
+31 : make_simple_alias
+32 : foo

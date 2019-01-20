@@ -46,6 +46,8 @@ std::map<Function *, FunPtrInfo> worklist;
 
 // store the data flow after function iterator.
 std::map<Function * ,std::map<Value *, std::set<Value *>>> GPointTos;
+// std::map<Function *, std::map<Value *, std::set<Value *>>> extraPointTos;
+
 int it_time = 0;
 
 class FunPtrVisitor : public DataflowVisitor<struct FunPtrInfo>{
@@ -142,12 +144,19 @@ public:
                             worklist[callee].PointTos[*tmpit].insert(dfval->PointTos[*tmpit].begin(),
                                 dfval->PointTos[*tmpit].end());
                         }
-                        // dfval->PointTos[x].insert(dfval->PointTos[y].begin(), 
-                        //     dfval->PointTos[y].end());
                         worklist[callee].PointTos[x].insert(y);
                     }
                     worklist[callee].PointTos[x].insert(dfval->PointTos[y].begin(),
                         dfval->PointTos[y].end());
+                }
+                
+                // TODO
+                // test for case 26
+                // pass all the dataflow value to callee and into GPointTos
+                for (std::map<Value *, std::set<Value *>>::iterator it = dfval->PointTos.begin();
+                    it != dfval->PointTos.end(); it++) {
+                    worklist[callee].PointTos[it->first].insert(it->second.begin(),
+                        it->second.end());
                 }
 
 
@@ -229,7 +238,7 @@ public:
                 Function *callee = CI->getCalledFunction();
                 for (unsigned i = 0;i < CI->getNumArgOperands(); ++i) {
                     Value *y = CI->getArgOperand(i);
-                    // only for args, should not iterate all the dfval
+                    
                     if(GPointTos[callee].find(y)!=GPointTos[callee].end()){
                         dfval->PointTos[y].clear();
                         dfval->PointTos[y].insert(GPointTos[callee][y].begin(), 
@@ -237,7 +246,37 @@ public:
                     } else {
                         dfval->PointTos[y].clear();
                     }
-                } 
+                }
+                
+
+                for (std::map<Value *, std::set<Value *>>::iterator it = GPointTos[callee].begin();
+                    it != GPointTos[callee].end(); it++) {
+                    // errs()<<"point is "<<*(it->first)<<"\n";
+                    dfval->PointTos[it->first].clear();
+                    // errs()<<"values are\n";
+                    // for (std::set<Value *>::iterator iit = it->second.begin(); iit != it->second.end(); iit++) {
+                    //     errs()<<**iit<<"\n";
+                    // }
+                    // errs()<<"end for point "<<*(it->first)<<"\n\n";
+                    dfval->PointTos[it->first].insert(it->second.begin(), it->second.end());
+                }
+                // pass all the dfval
+                // For case 26
+
+
+
+                // for(std::map<Value *,std::set<Value *>>::iterator it = dfval->PointTos.begin(); 
+                //     it!= dfval->PointTos.end(); it++){
+                //     if(GPointTos[callee].find((*it).first)!=GPointTos[callee].end()){
+                //         dfval->PointTos[(*it).first].clear();
+                //         dfval->PointTos[(*it).first].insert(GPointTos[callee][(*it).first].begin(), 
+                //             GPointTos[callee][(*it).first].end());
+                //     } else {
+                //         dfval->PointTos[(*it).first].clear();
+                //     }
+                // } 
+
+                // errs()<<"overover\n---------------------------------\n";
             }
         } else if (ReturnInst *Ri = dyn_cast<ReturnInst>(inst)) {
             if (dfval->PointTos[Ri->getReturnValue()].size() > 0) {
@@ -275,8 +314,8 @@ public:
                         // y shican
                         if (dfval->PointTos.find(x) != dfval->PointTos.end()) {
 
-                            Function *fun = Ri->getParent()->getParent();
-                            GPointTos[fun][y].insert(dfval->PointTos[x].begin(),dfval->PointTos[x].end());  
+                            // Function *fun = Ri->getParent()->getParent();
+                            GPointTos[callee][y].insert(dfval->PointTos[x].begin(),dfval->PointTos[x].end());  
                             it_time += 1;
                             if (it_time < 5) {
 
@@ -295,9 +334,27 @@ public:
                             }
                         }
                     }
+                    // we should pass all the dfval into GPoint except the xingcan
+                    // Too much trouble
+
+                    // for (std::map<Value *, std::set<Value *>>::iterator it = dfval->PointTos.begin();
+                    //     it != dfval->PointTos.end(); it++) {
+                    //     int flag = 0;
+                    //     for (unsigned i = 0;i < (*cit)->getNumArgOperands(); ++i) {   
+                    //         Function::arg_iterator argit = callee->arg_begin();
+                    //         argit += i;
+                    //         Value *x = &*argit;
+                    //         if (it->first == x) {
+                    //             flag = 1;
+                    //             break;
+                    //         }
+                    //     }
+                    //     if (!flag) {
+                    //         GPointTos[callee][it->first].insert(it->second.begin(),it->second.end());
+                    //     }
+                    // }
                 }
             }
-
         } else if (PHINode *Phi = dyn_cast<PHINode>(inst)) {
             unsigned num = Phi->getNumIncomingValues();
             for (unsigned i = 0; i < num; ++i) {
@@ -330,8 +387,30 @@ public:
                     std::set<Value *> tmpset = dfval->PointTos[Pop];
                     for (std::set<Value *>::iterator tmpit = tmpset.begin(); tmpit != tmpset.end();
                         tmpit++) {
-                        dfval->PointTos[*tmpit].clear();
-                        dfval->PointTos[*tmpit].insert(Vop);
+
+                        // *tmpit = %24
+                        // %24 -> %4
+                        // for case 26's else branch
+
+                        if (LoadInst *li = dyn_cast<LoadInst>(*tmpit)) {
+
+                            for (std::set<Value *>::iterator it = dfval->PointTos[li].begin();
+                                it != dfval->PointTos[li].end(); it++) {
+                                if (isa<AllocaInst>(*it)) {
+                                    for (std::set<Value *>::iterator iit = dfval->PointTos[*it].begin();
+                                        iit != dfval->PointTos[*it].end(); iit++) {
+                                        dfval->PointTos[*iit].clear();
+                                        dfval->PointTos[*iit].insert(Vop);
+
+                                    }
+                                }
+                            }
+                        }
+                        else {
+                            dfval->PointTos[*tmpit].clear();
+                            dfval->PointTos[*tmpit].insert(Vop);
+                        } 
+                        
                     } 
                 }
                 
@@ -344,12 +423,59 @@ public:
                         dfval->PointTos[*tmpit].insert(Vop);
                     } 
                 } else {
+                    std::set<Value *> should_insert;
+                    // TODO
+                    // for case 26 if branch
+                    // Vop = %6
+                    // %6 -> %5'
+
+                    if (LoadInst *li = dyn_cast<LoadInst>(Vop)) {
+                        for (std::set<Value *>::iterator it = dfval->PointTos[li].begin();
+                            it != dfval->PointTos[li].end(); it++) {
+                            if (isa<AllocaInst>(*it)) {
+                                for (std::set<Value *>::iterator iit = dfval->PointTos[*it].begin();
+                                    iit != dfval->PointTos[*it].end(); iit++) {
+                                    if (dfval->PointTos[*iit].begin() != dfval->PointTos[*iit].end())
+                                        should_insert = dfval->PointTos[*iit];
+                                }
+                            }
+                        }
+                    }
+                    
                     std::set<Value *> tmpset = dfval->PointTos[Pop];
                     for (std::set<Value *>::iterator tmpit = tmpset.begin(); tmpit != tmpset.end();
                         tmpit++) {
-                        dfval->PointTos[*tmpit].clear();
-                        dfval->PointTos[*tmpit].insert(dfval->PointTos[Vop].begin(),
-                            dfval->PointTos[Vop].end());
+                        // *tmpit = %10
+                        // %10 -> %7' bitcast
+                        
+                        if (LoadInst *li = dyn_cast<LoadInst>(*tmpit)) {
+                            for (std::set<Value *>::iterator it = dfval->PointTos[li].begin();
+                                it != dfval->PointTos[li].end(); it++) {
+                                if (isa<BitCastInst>(*it)) {
+                                    
+                                    for (std::set<Value *>::iterator iit = dfval->PointTos[*it].begin();
+                                        iit != dfval->PointTos[*it].end(); iit++) {
+                                        for (std::set<Value *>::iterator iiit = dfval->PointTos[*iit].begin();
+                                            iiit != dfval->PointTos[*iit].end(); iiit++) {
+
+                                            dfval->PointTos[*iiit].clear();
+                                            dfval->PointTos[*iiit].insert(should_insert.begin(),
+                                                should_insert.end());
+                                            GPointTos[Si->getParent()->getParent()][*iiit].insert(dfval->PointTos[*iiit].begin(),
+                                                dfval->PointTos[*iiit].end());
+                                        }
+                                    }
+                                }
+                            }
+
+
+                        } else {
+                            dfval->PointTos[*tmpit].clear();
+                            dfval->PointTos[*tmpit].insert(dfval->PointTos[Vop].begin(),
+                                dfval->PointTos[Vop].end());
+                        }
+
+                        
                     } 
                 }        
             }
