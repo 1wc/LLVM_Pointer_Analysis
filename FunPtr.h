@@ -52,7 +52,7 @@ std::map<Function *, FunPtrInfo> worklist;
 std::map<Function * ,std::map<Value *, std::set<Value *>>> GPointTos;
 
 int it_time = 0;
-
+int retry_time = 1;
 class FunPtrVisitor : public DataflowVisitor<struct FunPtrInfo>{
 
 public:
@@ -292,17 +292,33 @@ public:
                     for (std::set<Function *>::iterator fit = cit->second.begin();
                         fit != cit->second.end(); fit++) {
                         if (*fit == Ri->getParent()->getParent()) {
-                            // TODO, now we solve this issue by a trick.
-                            it_time += 1;
-                            if (it_time < 10) {
+                            Function *callee = *fit;
+                            for (unsigned i = 0;i < cit->first->getNumArgOperands(); ++i) {
+                                Value *y = cit->first->getArgOperand(i);    
+                                Function::arg_iterator argit = callee->arg_begin();
+                                argit += i;
+                                Value *x = &*argit;
+                                // x xingcan
+                                // y shican
 
-                                // solve 30 & 20, pass all dlval to caller
-                                for (std::map<Value *, std::set<Value *>>::iterator mapit = dfval->PointTos.begin();
-                                    mapit != dfval->PointTos.end(); mapit++) {
-                                    worklist[cit->first->getParent()->getParent()].PointTos[mapit->first].insert(mapit->second.begin(),
-                                        mapit->second.end());
+                                // delete trick, use GPointTos to break circle
+                                if (dfval->PointTos.find(x) != dfval->PointTos.end()) {
+
+                                    if (GPointTos[callee][y] != dfval->PointTos[x]) {
+                                        GPointTos[callee][y].insert(dfval->PointTos[x].begin(),dfval->PointTos[x].end());
+                                        for (std::map<Value *, std::set<Value *>>::iterator mapit = dfval->PointTos.begin();
+                                            mapit != dfval->PointTos.end(); mapit++) {
+                                            if (mapit->first == x) {
+                                                continue;
+                                            }
+                                            worklist[cit->first->getParent()->getParent()].PointTos[mapit->first].insert(mapit->second.begin(),
+                                                mapit->second.end());
+                                        } 
+                                    }
                                 }
                             }
+                            // we should pass all the dfval into GPoint except the xingcan
+                            // Too much trouble, refuse.
                         }
                     }
                 }
@@ -324,16 +340,12 @@ public:
                         Value *x = &*argit;
                         // x xingcan
                         // y shican
+                        
+                        // delete trick, use GPointTos to break circle
                         if (dfval->PointTos.find(x) != dfval->PointTos.end()) {
 
-                            // Function *fun = Ri->getParent()->getParent();
-                            GPointTos[callee][y].insert(dfval->PointTos[x].begin(),dfval->PointTos[x].end());  
-                            it_time += 1;
-                            if (it_time < 10) {
-
-                                // TODO
-                                // FunPtrInfo initval;
-                                // worklist[caller] = initval;
+                            if (GPointTos[callee][y] != dfval->PointTos[x]) {
+                                GPointTos[callee][y].insert(dfval->PointTos[x].begin(),dfval->PointTos[x].end());
                                 for (std::map<Value *, std::set<Value *>>::iterator mapit = dfval->PointTos.begin();
                                     mapit != dfval->PointTos.end(); mapit++) {
                                     if (mapit->first == x) {
@@ -341,7 +353,7 @@ public:
                                     }
                                     worklist[caller].PointTos[mapit->first].insert(mapit->second.begin(),
                                         mapit->second.end());
-                                }
+                                } 
                             }
                         }
                     }
@@ -355,13 +367,13 @@ public:
                 Value *v = Phi->getIncomingValue(i);
                 dfval->PointTos[Phi].insert(v);
 
-                // if (PHINode *inPhi = dyn_cast<PHINode>(v)) {
-                //     for (unsigned j = 0;j < inPhi->getNumIncomingValues(); ++j) {
-                //         if (Function *func = dyn_cast<Function>(inPhi->getIncomingValue(j))) {
-                //             dfval->PointTos[Phi].insert(inPhi->getIncomingValue(j));
-                //         }
-                //     }
-                // }
+                if (PHINode *inPhi = dyn_cast<PHINode>(v)) {
+                    for (unsigned j = 0;j < inPhi->getNumIncomingValues(); ++j) {
+                        if (Function *func = dyn_cast<Function>(inPhi->getIncomingValue(j))) {
+                            dfval->PointTos[Phi].insert(inPhi->getIncomingValue(j));
+                        }
+                    }
+                }
             }
         } else if (GetElementPtrInst *Gep = dyn_cast<GetElementPtrInst>(inst)) {
             
@@ -557,31 +569,14 @@ public:
             FunPtrInfo initval;
             worklist[&F] = initval;
         }
-        // for (Function &F : M) {
-        //     FunPtrInfo initval;
-        //     worklist[&F] = initval;
-        // }
-        
-        // while (worklist.size() > 0) {
-        //     for(std::map<Function *, FunPtrInfo>::iterator it = worklist.begin() ; it != worklist.end() ; it++){
-        //         errs()<<"deal with "<<it->first->getName()<<"\n";
-        //         errs()<<"size is "<<worklist.size()<<"\n";
-        //         errs()<< "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n";
-        //         FunPtrVisitor visitor;
-        //         DataflowResult<FunPtrInfo>::Type result;
-        //         compForwardDataflow(it->first, &visitor, &result, it->second);
-        //         // printDataflowResult<FunPtrInfo>(errs(), result);
-        //         worklist.erase(it);
-        //     }
-        // }
 
         while (worklist.size() > 0) {
             Function *F = worklist.begin()->first;
             FunPtrInfo fpi = worklist.begin()->second;
             worklist.erase(worklist.begin());
-            // errs()<<"deal with "<<F->getName()<<"\n";
-            // errs()<<"size is "<<worklist.size()<<"\n";
-            // errs()<< "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n";
+            errs()<<"deal with "<<F->getName()<<"\n";
+            errs()<<"size is "<<worklist.size()<<"\n";
+            errs()<< "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n";
             FunPtrVisitor visitor;
             DataflowResult<FunPtrInfo>::Type result;
             compForwardDataflow(F, &visitor, &result, fpi);

@@ -87,7 +87,7 @@ attributes #3 = { nounwind }
 !llvm.ident = !{!12}
 
 !0 = distinct !DICompileUnit(language: DW_LANG_C99, file: !1, producer: "clang version 5.0.1 (tags/RELEASE_501/final)", isOptimized: false, runtimeVersion: 0, emissionKind: FullDebug, enums: !2, retainedTypes: !3)
-!1 = !DIFile(filename: "test06.c", directory: "/home/nevv/llvm-assignment/assignment3_testcase_ver2")
+!1 = !DIFile(filename: "test06.c", directory: "/home/liwc/llvm-assignment/assignment3_testcase_ver2")
 !2 = !{}
 !3 = !{!4}
 !4 = !DIDerivedType(tag: DW_TAG_pointer_type, baseType: !5, size: 64)
