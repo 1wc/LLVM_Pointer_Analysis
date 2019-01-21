@@ -98,6 +98,7 @@ void compForwardDataflow(Function *fn,
         BasicBlock *bb = *worklist.begin();
         worklist.erase(worklist.begin());
         
+        // errs()<<*bb<<"\n";
         // Merge all outcoming value
         T bbentryval = (*result)[bb].first;
         for (auto pi = pred_begin(bb), pe = pred_end(bb); pi != pe; pi++) {

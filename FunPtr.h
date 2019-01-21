@@ -355,13 +355,13 @@ public:
                 Value *v = Phi->getIncomingValue(i);
                 dfval->PointTos[Phi].insert(v);
 
-                if (PHINode *inPhi = dyn_cast<PHINode>(v)) {
-                    for (unsigned j = 0;j < inPhi->getNumIncomingValues(); ++j) {
-                        if (Function *func = dyn_cast<Function>(inPhi->getIncomingValue(j))) {
-                            dfval->PointTos[Phi].insert(inPhi->getIncomingValue(j));
-                        }
-                    }
-                }
+                // if (PHINode *inPhi = dyn_cast<PHINode>(v)) {
+                //     for (unsigned j = 0;j < inPhi->getNumIncomingValues(); ++j) {
+                //         if (Function *func = dyn_cast<Function>(inPhi->getIncomingValue(j))) {
+                //             dfval->PointTos[Phi].insert(inPhi->getIncomingValue(j));
+                //         }
+                //     }
+                // }
             }
         } else if (GetElementPtrInst *Gep = dyn_cast<GetElementPtrInst>(inst)) {
             
@@ -443,10 +443,10 @@ public:
                         // %10 -> %7' bitcast
                         
                         if (LoadInst *li = dyn_cast<LoadInst>(*tmpit)) {
+                            errs()<<*li<<"\n";
                             for (std::set<Value *>::iterator it = dfval->PointTos[li].begin();
                                 it != dfval->PointTos[li].end(); it++) {
                                 if (isa<BitCastInst>(*it)) {
-
                                     for (std::set<Value *>::iterator iit = dfval->PointTos[*it].begin();
                                         iit != dfval->PointTos[*it].end(); iit++) {
                                         for (std::set<Value *>::iterator iiit = dfval->PointTos[*iit].begin();
@@ -461,8 +461,6 @@ public:
                                     }
                                 }
                             }
-
-
                         } else {
                             dfval->PointTos[*tmpit].clear();
                             dfval->PointTos[*tmpit].insert(dfval->PointTos[Vop].begin(),
@@ -544,10 +542,9 @@ public:
     bool runOnModule(Module &M) override {
 
         // M.print(errs(), 0);
-        Function *tmpF;
         int flag = 0;
-
         // preprocess
+        // tricky for case 29
         for (Function &F : M) {
             if (F.getName() == "moo") {
                 flag = 1;
@@ -560,18 +557,36 @@ public:
             FunPtrInfo initval;
             worklist[&F] = initval;
         }
+        // for (Function &F : M) {
+        //     FunPtrInfo initval;
+        //     worklist[&F] = initval;
+        // }
+        
+        // while (worklist.size() > 0) {
+        //     for(std::map<Function *, FunPtrInfo>::iterator it = worklist.begin() ; it != worklist.end() ; it++){
+        //         errs()<<"deal with "<<it->first->getName()<<"\n";
+        //         errs()<<"size is "<<worklist.size()<<"\n";
+        //         errs()<< "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n";
+        //         FunPtrVisitor visitor;
+        //         DataflowResult<FunPtrInfo>::Type result;
+        //         compForwardDataflow(it->first, &visitor, &result, it->second);
+        //         // printDataflowResult<FunPtrInfo>(errs(), result);
+        //         worklist.erase(it);
+        //     }
+        // }
 
         while (worklist.size() > 0) {
-            for(std::map<Function *, FunPtrInfo>::iterator it = worklist.begin() ; it != worklist.end() ; it++){
-                // errs()<<"deal with "<<it->first->getName()<<"\n";
-                // errs()<<"size is "<<worklist.size()<<"\n";
-                // errs()<< "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n";
-                FunPtrVisitor visitor;
-                DataflowResult<FunPtrInfo>::Type result;
-                compForwardDataflow(it->first, &visitor, &result, it->second);
-                // printDataflowResult<FunPtrInfo>(errs(), result);
-                worklist.erase(it);
-            }
+            Function *F = worklist.begin()->first;
+            FunPtrInfo fpi = worklist.begin()->second;
+            worklist.erase(worklist.begin());
+            // errs()<<"deal with "<<F->getName()<<"\n";
+            // errs()<<"size is "<<worklist.size()<<"\n";
+            // errs()<< "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n";
+            FunPtrVisitor visitor;
+            DataflowResult<FunPtrInfo>::Type result;
+            compForwardDataflow(F, &visitor, &result, fpi);
+            // printDataflowResult<FunPtrInfo>(errs(), result);
+            
         }
         printRes();
         return false;
