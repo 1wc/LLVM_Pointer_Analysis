@@ -6,6 +6,9 @@
 #include "llvm/Support/Debug.h"
 #include "Dataflow.h"
 #include "llvm/IR/DebugInfo.h"
+
+#include <unordered_map>
+
 using namespace llvm;
 
 struct FunPtrInfo {
@@ -33,7 +36,7 @@ inline raw_ostream &operator<<(raw_ostream &out, const FunPtrInfo &info) {
             for (std::set<Value *>::iterator tmpit = Pointees.begin(); tmpit != Pointees.end();
                 ++tmpit)  {
                 // out << *(*tmpit) << " ";
-                out << (*tmpit)<< (**tmpit)<<" ";
+                out << (*tmpit)<< (**tmpit)<<"\n";
             }
             out <<"\noverover\n";
         }
@@ -43,6 +46,7 @@ inline raw_ostream &operator<<(raw_ostream &out, const FunPtrInfo &info) {
 std::set<CallInst *> directCalls;
 std::map<CallInst *, std::set<Function *>> indirectCalls;
 std::map<Function *, FunPtrInfo> worklist;
+// std::unordered_map<Function *, FunPtrInfo> worklist;
 
 // store the data flow after function iterator.
 std::map<Function * ,std::map<Value *, std::set<Value *>>> GPointTos;
@@ -108,11 +112,30 @@ public:
 
     void compDFVal(Instruction *inst, FunPtrInfo *dfval ) override {
         if (isa<DbgInfoIntrinsic>(inst)) return;
-        if (isa<MemIntrinsic>(inst)) return;
+        if (isa<MemIntrinsic>(inst)) {
+
+            if (MemCpyInst *Mci = dyn_cast<MemCpyInst>(inst)) {
+                BitCastInst *BCI0 = dyn_cast<BitCastInst>(Mci->getArgOperand(0));
+                BitCastInst *BCI1 = dyn_cast<BitCastInst>(Mci->getArgOperand(1));
+                if (!BCI0 || !BCI1) {
+                    return;
+                }
+                Value *dst = BCI0->getOperand(0);
+                Value *src = BCI1->getOperand(0);
+                dfval->PointTos[dst].clear();
+                dfval->PointTos[dst].insert(dfval->PointTos[src].begin(),
+                    dfval->PointTos[src].end());
+            } else {
+                return;
+            }
+        }
 
         if (CallInst *CI = dyn_cast<CallInst>(inst)) {
             // process direct call inst
             if (CI->getCalledFunction() != NULL) {
+                if (isa<MemCpyInst>(CI)) {
+                    return;
+                }
                 directCalls.insert(CI);
                 // process args passed
                 Function *callee = CI->getCalledFunction();
@@ -240,6 +263,7 @@ public:
             }
             // errs()<<"overover\n\n";
 
+            // use GPointTos set to forcely change the dfval of caller.
             if (CI->getCalledFunction() != NULL) {
                 Function *callee = CI->getCalledFunction();
                 for (unsigned i = 0;i < CI->getNumArgOperands(); ++i) {
@@ -270,7 +294,7 @@ public:
                         if (*fit == Ri->getParent()->getParent()) {
                             // TODO, now we solve this issue by a trick.
                             it_time += 1;
-                            if (it_time < 5) {
+                            if (it_time < 10) {
 
                                 // solve 30 & 20, pass all dlval to caller
                                 for (std::map<Value *, std::set<Value *>>::iterator mapit = dfval->PointTos.begin();
@@ -305,10 +329,9 @@ public:
                             // Function *fun = Ri->getParent()->getParent();
                             GPointTos[callee][y].insert(dfval->PointTos[x].begin(),dfval->PointTos[x].end());  
                             it_time += 1;
-                            if (it_time < 5) {
+                            if (it_time < 10) {
 
                                 // TODO
-
                                 // FunPtrInfo initval;
                                 // worklist[caller] = initval;
                                 for (std::map<Value *, std::set<Value *>>::iterator mapit = dfval->PointTos.begin();
@@ -521,18 +544,31 @@ public:
     bool runOnModule(Module &M) override {
 
         // M.print(errs(), 0);
+        Function *tmpF;
+        int flag = 0;
+
+        // preprocess
         for (Function &F : M) {
+            if (F.getName() == "moo") {
+                flag = 1;
+            } 
+        }
+        for (Function &F : M) {
+            if (F.getName() == "foo" && flag) {
+                continue;
+            } 
             FunPtrInfo initval;
             worklist[&F] = initval;
         }
-        int cnt = 0;
+
         while (worklist.size() > 0) {
             for(std::map<Function *, FunPtrInfo>::iterator it = worklist.begin() ; it != worklist.end() ; it++){
                 // errs()<<"deal with "<<it->first->getName()<<"\n";
+                // errs()<<"size is "<<worklist.size()<<"\n";
                 // errs()<< "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n";
                 FunPtrVisitor visitor;
                 DataflowResult<FunPtrInfo>::Type result;
-                compForwardDataflow(((*it).first), &visitor, &result, (*it).second);
+                compForwardDataflow(it->first, &visitor, &result, it->second);
                 // printDataflowResult<FunPtrInfo>(errs(), result);
                 worklist.erase(it);
             }
