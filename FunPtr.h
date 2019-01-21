@@ -340,7 +340,7 @@ public:
                         Value *x = &*argit;
                         // x xingcan
                         // y shican
-                        
+
                         // delete trick, use GPointTos to break circle
                         if (dfval->PointTos.find(x) != dfval->PointTos.end()) {
 
@@ -555,17 +555,8 @@ public:
 
         // M.print(errs(), 0);
         int flag = 0;
-        // preprocess
-        // tricky for case 29
+        
         for (Function &F : M) {
-            if (F.getName() == "moo") {
-                flag = 1;
-            } 
-        }
-        for (Function &F : M) {
-            if (F.getName() == "foo" && flag) {
-                continue;
-            } 
             FunPtrInfo initval;
             worklist[&F] = initval;
         }
@@ -574,9 +565,9 @@ public:
             Function *F = worklist.begin()->first;
             FunPtrInfo fpi = worklist.begin()->second;
             worklist.erase(worklist.begin());
-            errs()<<"deal with "<<F->getName()<<"\n";
-            errs()<<"size is "<<worklist.size()<<"\n";
-            errs()<< "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n";
+            // errs()<<"deal with "<<F->getName()<<"\n";
+            // errs()<<"size is "<<worklist.size()<<"\n";
+            // errs()<< "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n";
             FunPtrVisitor visitor;
             DataflowResult<FunPtrInfo>::Type result;
             compForwardDataflow(F, &visitor, &result, fpi);
