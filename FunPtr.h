@@ -261,6 +261,16 @@ public:
 
                 }
             }
+
+            for (std::set<Value *>::iterator it = dfval->PointTos[CI].begin();
+                it != dfval->PointTos[CI].end(); it++) {
+                for (std::set<Value *>::iterator iit = dfval->PointTos[*it].begin();
+                    iit != dfval->PointTos[*it].end(); iit++) {
+                    if (auto *func = dyn_cast<Function>(*iit)) {
+                        dfval->PointTos[CI].insert(func);
+                    }
+                }
+            }
             // errs()<<"overover\n\n";
 
             // use GPointTos set to forcely change the dfval of caller.
@@ -553,9 +563,8 @@ public:
   }
     bool runOnModule(Module &M) override {
 
-        // M.print(errs(), 0);
-        int flag = 0;
-        
+        M.print(errs(), 0);
+
         for (Function &F : M) {
             FunPtrInfo initval;
             worklist[&F] = initval;
@@ -565,13 +574,13 @@ public:
             Function *F = worklist.begin()->first;
             FunPtrInfo fpi = worklist.begin()->second;
             worklist.erase(worklist.begin());
-            // errs()<<"deal with "<<F->getName()<<"\n";
-            // errs()<<"size is "<<worklist.size()<<"\n";
-            // errs()<< "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n";
+            errs()<<"deal with "<<F->getName()<<"\n";
+            errs()<<"size is "<<worklist.size()<<"\n";
+            errs()<< "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n";
             FunPtrVisitor visitor;
             DataflowResult<FunPtrInfo>::Type result;
             compForwardDataflow(F, &visitor, &result, fpi);
-            // printDataflowResult<FunPtrInfo>(errs(), result);
+            printDataflowResult<FunPtrInfo>(errs(), result);
             
         }
         printRes();
