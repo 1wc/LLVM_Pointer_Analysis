@@ -108,8 +108,7 @@ public:
         Value *dst = BCI0->getOperand(0);
         Value *src = BCI1->getOperand(0);
         dfv(dst).clear();
-        dfv(dst).insert(dfv(src).begin(),
-            dfv(src).end());
+        dfv(dst).insert(dfv(src).begin(), dfv(src).end());
     }
     void visitCallInst(CallInst *CI, FunPtrInfo *dfval) {
         // process direct call inst
@@ -188,8 +187,7 @@ public:
                 }
             }
 
-            for (auto it = dfv(pvv).begin(); 
-            it != dfv(pvv).end(); it++) {
+            for (auto it = dfv(pvv).begin(); it != dfv(pvv).end(); it++) {
                 if (Function *callee = dyn_cast<Function>(*it)){
                     for (unsigned i = 0;i < CI->getNumArgOperands(); ++i) {
                         Value *y = CI->getArgOperand(i);    
@@ -241,10 +239,8 @@ public:
             }
         }
         // a special case
-        for (auto it = dfv(CI).begin();
-            it != dfv(CI).end(); it++) {
-            for (auto iit = dfv(*it).begin();
-                iit != dfv(*it).end(); iit++) {
+        for (auto it = dfv(CI).begin(); it != dfv(CI).end(); it++) {
+            for (auto iit = dfv(*it).begin(); iit != dfv(*it).end(); iit++) {
                 if (auto *func = dyn_cast<Function>(*iit)) {
                     dfv(CI).insert(func);
                 }
@@ -258,7 +254,7 @@ public:
             Function *callee = CI->getCalledFunction();
             for (unsigned i = 0;i < CI->getNumArgOperands(); ++i) {
                 Value *y = CI->getArgOperand(i);
-                
+
                 if(GPointTos[callee].find(y)!=GPointTos[callee].end()){
                     dfv(y).clear();
                     dfv(y).insert(GPointTos[callee][y].begin(), 
@@ -293,7 +289,7 @@ public:
                             // y real arg
                             if (dfval->PointTos.find(x) != dfval->PointTos.end()) {
                                 if (GPointTos[callee][y] != dfv(x)) {
-                                    GPointTos[callee][y].insert(dfv(x).begin(),dfv(x).end());
+                                    GPointTos[callee][y].insert(dfv(x).begin(), dfv(x).end());
                                     for (PointMap::iterator mapit = dfval->PointTos.begin();
                                         mapit != dfval->PointTos.end(); mapit++) {
                                         if (mapit->first == x) {
