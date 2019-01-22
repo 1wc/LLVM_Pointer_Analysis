@@ -46,10 +46,10 @@ inline raw_ostream &operator<<(raw_ostream &out, const FunPtrInfo &info) {
 std::set<CallInst *> directCalls;
 std::map<CallInst *, std::set<Function *>> indirectCalls;
 std::map<Function *, FunPtrInfo> worklist;
-// std::unordered_map<Function *, FunPtrInfo> worklist;
 
 // store the data flow after function iterator.
-std::map<Function * ,std::map<Value *, std::set<Value *>>> GPointTos;
+std::map<Function * , std::map<Value *, std::set<Value *>>> GPointTos;
+std::map<ReturnInst *, std::set<Value *>> RetVals;
 
 int it_time = 0;
 int retry_time = 1;
@@ -172,8 +172,6 @@ public:
                         dfval->PointTos[y].end());
                 }
                 
-                // TODO
-                // test for case 26
                 // pass all the dataflow value to callee
                 for (std::map<Value *, std::set<Value *>>::iterator it = dfval->PointTos.begin();
                     it != dfval->PointTos.end(); it++) {
@@ -205,14 +203,28 @@ public:
                                     }
                                 }
                             }
+                            if (isa<LoadInst>(pvv)) {
+                                for (std::set<Value *>::iterator vit = dfval->PointTos[*cddit].begin();
+                                    vit != dfval->PointTos[*cddit].end(); vit++) {
+                                    if (isa<AllocaInst>(*vit)) {
+                                        // tmpset.insert(func);
+                                        for (std::set<Value *>::iterator vvit = dfval->PointTos[*vit].begin();
+                                            vvit != dfval->PointTos[*vit].end(); vvit++) {
+                                            if (Function *func = dyn_cast<Function>(*vvit)) {
+                                                tmpset.insert(func);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
-                // errs()<<"over\n\n";
+
                 for (std::set<Value *>::iterator it = dfval->PointTos[pvv].begin(); 
                 it != dfval->PointTos[pvv].end(); it++) {
                     if (Function *callee = dyn_cast<Function>(*it)){
-                        // errs()<<callee->getName()<<"\n";
+
                         for (unsigned i = 0;i < CI->getNumArgOperands(); ++i) {
                             Value *y = CI->getArgOperand(i);    
                             Function::arg_iterator argit = callee->arg_begin();
@@ -261,7 +273,7 @@ public:
 
                 }
             }
-
+            // solve case 31, the ret val is a phi, so its pointer's pointer is the true callee
             for (std::set<Value *>::iterator it = dfval->PointTos[CI].begin();
                 it != dfval->PointTos[CI].end(); it++) {
                 for (std::set<Value *>::iterator iit = dfval->PointTos[*it].begin();
@@ -333,7 +345,15 @@ public:
                     }
                 }
             }
-
+            
+            // mark and pass to callee if the retval is changed
+            int mark = 0;
+            if (RetVals[Ri] != dfval->PointTos[Ri->getReturnValue()]) {
+                mark = 1;
+                RetVals[Ri].clear();
+                RetVals[Ri].insert(dfval->PointTos[Ri->getReturnValue()].begin(),
+                    dfval->PointTos[Ri->getReturnValue()].end());
+            }
             // iterate functions to find the caller
             // now we should search on not only directCall but also indirectCall.
             // errs()<<"circle start\n";
@@ -342,6 +362,7 @@ public:
                 // into worklist.
                 Function *caller = (*cit)->getParent()->getParent();
                 Function *callee = (*cit)->getCalledFunction();
+
                 if (callee == Ri->getParent()->getParent()) {
                     for (unsigned i = 0;i < (*cit)->getNumArgOperands(); ++i) {
                         Value *y = (*cit)->getArgOperand(i);    
@@ -364,8 +385,17 @@ public:
                                     worklist[caller].PointTos[mapit->first].insert(mapit->second.begin(),
                                         mapit->second.end());
                                 } 
+                            } else if (mark) {
+                                for (std::map<Value *, std::set<Value *>>::iterator mapit = dfval->PointTos.begin();
+                                    mapit != dfval->PointTos.end(); mapit++) {
+                                    if (mapit->first == x) {
+                                        continue;
+                                    }
+                                    worklist[caller].PointTos[mapit->first].insert(mapit->second.begin(),
+                                        mapit->second.end());
+                                }
                             }
-                        }
+                        } 
                     }
                     // we should pass all the dfval into GPoint except the xingcan
                     // Too much trouble, refuse.
@@ -465,7 +495,7 @@ public:
                         // %10 -> %7' bitcast
                         
                         if (LoadInst *li = dyn_cast<LoadInst>(*tmpit)) {
-                            errs()<<*li<<"\n";
+                            // errs()<<*li<<"\n";
                             for (std::set<Value *>::iterator it = dfval->PointTos[li].begin();
                                 it != dfval->PointTos[li].end(); it++) {
                                 if (isa<BitCastInst>(*it)) {
@@ -563,7 +593,7 @@ public:
   }
     bool runOnModule(Module &M) override {
 
-        M.print(errs(), 0);
+        // M.print(errs(), 0);
 
         for (Function &F : M) {
             FunPtrInfo initval;
@@ -574,13 +604,13 @@ public:
             Function *F = worklist.begin()->first;
             FunPtrInfo fpi = worklist.begin()->second;
             worklist.erase(worklist.begin());
-            errs()<<"deal with "<<F->getName()<<"\n";
-            errs()<<"size is "<<worklist.size()<<"\n";
-            errs()<< "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n";
+            // errs()<<"deal with "<<F->getName()<<"\n";
+            // errs()<<"size is "<<worklist.size()<<"\n";
+            // errs()<< "--------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n";
             FunPtrVisitor visitor;
             DataflowResult<FunPtrInfo>::Type result;
             compForwardDataflow(F, &visitor, &result, fpi);
-            printDataflowResult<FunPtrInfo>(errs(), result);
+            // printDataflowResult<FunPtrInfo>(errs(), result);
             
         }
         printRes();
