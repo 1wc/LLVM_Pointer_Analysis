@@ -528,7 +528,10 @@ public:
             if (isa<BitCastInst>(Pop)) {
                 dfval->PointTos[Li].insert(dfval->PointTos[Pop].begin(),
                     dfval->PointTos[Pop].end());
-            } else {
+            } else if(dfval->PointTos[Pop].begin() != dfval->PointTos[Pop].end() && isa<Function>(*(dfval->PointTos[Pop].begin()))){
+                dfval->PointTos[Li].insert(dfval->PointTos[Pop].begin(),
+                    dfval->PointTos[Pop].end());
+            } else{
                 std::set<Value *> tmpset = dfval->PointTos[Pop];
                 for (std::set<Value *>::iterator tmpit = tmpset.begin(); tmpit != tmpset.end();
                     tmpit++) {
@@ -537,7 +540,6 @@ public:
                 }
             }
         } 
-
     }
 
 };
@@ -593,7 +595,7 @@ public:
   }
     bool runOnModule(Module &M) override {
 
-        // M.print(errs(), 0);
+        M.print(errs(), 0);
 
         for (Function &F : M) {
             FunPtrInfo initval;
